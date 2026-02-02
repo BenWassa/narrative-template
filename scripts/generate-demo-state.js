@@ -9,17 +9,14 @@ const dayFolders = [
   {
     name: 'Day 1',
     day: 1,
-    bucketSequence: [],
   },
   {
     name: 'Day 2',
     day: 2,
-    bucketSequence: ['A', 'B', 'C', 'D', 'E', 'M'],
   },
   {
     name: 'Day 3',
     day: 3,
-    bucketSequence: ['D', 'D', 'B', 'B', null, null, null, null],
   },
 ];
 
@@ -30,6 +27,18 @@ const demoProjectId = 'narrative-template-demo';
 const demoProjectName = 'Narrative Demo';
 const demoRootPath = 'Narrative Demo Photos';
 const assetRelativeBase = '../../../../template-photos';
+
+const bucketMapByName = {
+  people: 'B',
+  food: 'M',
+  food_2: 'M',
+  detail: 'C',
+  detail_2: 'C',
+  action: 'D',
+  transition: 'E',
+};
+
+const day3AssignedSet = new Set(['people', 'action', 'food', 'detail']);
 
 function ensureDir(dir) {
   if (!fs.existsSync(dir)) {
@@ -56,10 +65,7 @@ function createPhotoRecords() {
     }
     const files = readFiles(folderPath);
     files.forEach((fileName, index) => {
-      const bucketValue =
-        index < dayFolder.bucketSequence.length
-          ? dayFolder.bucketSequence[index]
-          : null;
+      const bucketValue = deriveBucketForDay(dayFolder.day, fileName);
       const record = buildRecord({
         folder: dayFolder.name,
         fileName,
@@ -107,6 +113,21 @@ function createPhotoRecords() {
   }
 
   return records.sort((a, b) => a.timestamp - b.timestamp);
+}
+
+function deriveBucketForDay(dayNumber, fileName) {
+  if (!dayNumber) return null;
+  const baseName = path.parse(fileName).name.toLowerCase();
+  const mapped = bucketMapByName[baseName] || null;
+
+  if (dayNumber === 1) return null;
+  if (dayNumber === 2) return mapped || 'A';
+  if (dayNumber === 3) {
+    if (!day3AssignedSet.has(baseName)) return null;
+    return mapped || 'A';
+  }
+
+  return null;
 }
 
 function buildRecord({ folder, fileName, day, bucket, archived, sequence }) {

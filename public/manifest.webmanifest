@@ -1,0 +1,15 @@
+{
+  "name": "Narrative",
+  "short_name": "Narrative",
+  "start_url": "/Narrative/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "/Narrative/assets/Narrative_icon.png",
+      "sizes": "1024x1024",
+      "type": "image/png"
+    }
+  ]
+}

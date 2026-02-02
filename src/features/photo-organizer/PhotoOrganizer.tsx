@@ -40,7 +40,6 @@ import Toast from "./components/Toast";
 import FullscreenOverlay from "./components/FullscreenOverlay";
 import DebugOverlay from "./components/DebugOverlay";
 import { sortPhotos } from "./utils/photoOrdering";
-import { DEMO_PROJECT_NAME } from "./demo/demoProjectState";
 
 export default function PhotoOrganizer() {
   const prevThumbnailsRef = useRef<string[]>([]);
@@ -108,7 +107,6 @@ export default function PhotoOrganizer() {
     showToast,
     prevThumbnailsRef,
   });
-  const isDemoProject = projectName === DEMO_PROJECT_NAME;
 
   const {
     setHistory,
@@ -481,7 +479,6 @@ export default function PhotoOrganizer() {
           currentView={currentView}
           selectedDay={selectedDay}
           selectedRootFolder={selectedRootFolder}
-          isDemoProject={isDemoProject}
           photos={photos}
               rootGroups={rootGroups}
               filteredPhotos={filteredPhotos}

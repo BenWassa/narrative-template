@@ -20,6 +20,7 @@ interface PhotoGridProps {
   currentView: string;
   selectedDay: number | null;
   selectedRootFolder: string | null;
+  isDemoProject: boolean;
   photos: ProjectPhoto[];
   rootGroups: [string, ProjectPhoto[]][];
   filteredPhotos: ProjectPhoto[];
@@ -58,6 +59,7 @@ export default function PhotoGrid({
   currentView,
   selectedDay,
   selectedRootFolder,
+  isDemoProject,
   photos,
   rootGroups,
   filteredPhotos,
@@ -80,6 +82,19 @@ export default function PhotoGrid({
   isMeceBucketLabel,
 }: PhotoGridProps) {
   const clickTimerRef = useRef<Record<string, NodeJS.Timeout>>({});
+  const showDemoCallout = isDemoProject && currentView === "days";
+  const dayCallout =
+    showDemoCallout && selectedDay === 1
+      ? {
+          title: "Day 1: Try organizing these photos",
+          body: "This day is intentionally unassigned. Single-click to select, then press A-E/M/X (or use the right sidebar) to assign buckets. Double-click a photo to inspect it with the filmstrip.",
+        }
+      : showDemoCallout && selectedDay === 2
+      ? {
+          title: "Day 2: Already organized",
+          body: "This day is fully assigned so you can see the end state. Use \"Hide Assigned\" to compare, or open a photo to browse buckets in the viewer.",
+        }
+      : null;
 
   const handlePhotoClick = (photoId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -341,6 +356,14 @@ export default function PhotoGrid({
   if (selectedDay !== null && sortedGroups) {
     return (
       <div className="space-y-8">
+        {dayCallout && (
+          <div className="rounded-lg border border-blue-500/40 bg-blue-500/10 px-4 py-3 text-sm text-blue-100">
+            <div className="font-semibold text-blue-200">
+              {dayCallout.title}
+            </div>
+            <div className="mt-1 text-blue-100/90">{dayCallout.body}</div>
+          </div>
+        )}
         {sortedGroups.map((group) => {
           const groupSorted = group.photos;
           const videos = groupSorted.filter(isVideoPhoto);

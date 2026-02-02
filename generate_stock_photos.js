@@ -127,38 +127,40 @@ async function generateStockPhotos() {
   console.log('🖼️  Generating stock photos for Narrative Portfolio Template...\n');
 
   await fs.ensureDir(root);
+  const otherDir = path.join(root, 'OTHER');
+  await fs.ensureDir(otherDir);
 
   try {
     // 2024-01-15: Family trip photos (assigned)
-    console.log('📸 Creating family trip photos (2024-01-15)...');
+    console.log('📸 Creating family trip photos (Day 1 / 2024-01-15)...');
     await generatePhotosForDay(
-      path.join(root, '2024-01-15'),
+      path.join(root, 'Day 1'),
       '2024-01-15',
       STOCK_PHOTOS.family,
       8 // Start early morning
     );
 
     // 2024-01-16: General mixed photos (unassigned)
-    console.log('\n📸 Creating general photos (2024-01-16)...');
+    console.log('\n📸 Creating general photos (Day 2 / 2024-01-16)...');
     await generatePhotosForDay(
-      path.join(root, '2024-01-16'),
+      path.join(root, 'Day 2'),
       '2024-01-16',
       STOCK_PHOTOS.general,
       10
     );
 
     // 2024-01-17: Work photos (partial assignment)
-    console.log('\n📸 Creating work photos (2024-01-17)...');
+    console.log('\n📸 Creating work photos (Day 3 / 2024-01-17)...');
     await generatePhotosForDay(
-      path.join(root, '2024-01-17'),
+      path.join(root, 'Day 3'),
       '2024-01-17',
       STOCK_PHOTOS.work,
       9
     );
 
     // Archive folder with older dates
-    console.log('\n📸 Creating archive photos...');
-    const archiveDir = path.join(root, 'archive');
+    console.log('\n📸 Creating archive photos (OTHER/archive)...');
+    const archiveDir = path.join(otherDir, 'archive');
     await fs.ensureDir(archiveDir);
 
     const archiveDates = ['2023-12-15', '2023-11-20', '2023-10-05', '2023-09-12', '2023-08-30'];
@@ -180,13 +182,13 @@ async function generateStockPhotos() {
     }
 
     // Root level miscellaneous photos
-    console.log('\n📸 Creating miscellaneous root photos...');
+    console.log('\n📸 Creating miscellaneous photos in OTHER/...');
     for (let i = 0; i < STOCK_PHOTOS.misc.length; i++) {
       const date = '2024-01-14'; // Day before main demo
       const hour = 14 + i; // Spread throughout afternoon
       const dateTime = new Date(`${date}T${hour}:00:00Z`);
       const filename = `misc_${(i + 1).toString().padStart(3, '0')}.jpg`;
-      const filepath = path.join(root, filename);
+      const filepath = path.join(otherDir, filename);
 
       console.log(`Downloading ${filename}...`);
       const success = await downloadImage(STOCK_PHOTOS.misc[i], filepath);
@@ -202,11 +204,11 @@ async function generateStockPhotos() {
     console.log('\n🎉 Stock photos generated successfully!');
     console.log(`📁 Location: ${root}`);
     console.log('📊 Summary:');
-    console.log('- 2024-01-15: 10 family/vacation photos (assigned)');
-    console.log('- 2024-01-16: 6 general photos (unassigned)');
-    console.log('- 2024-01-17: 8 work photos (partial assignment)');
-    console.log('- archive/: 5 older photos (archived)');
-    console.log('- root level: 4 miscellaneous photos');
+    console.log('- Day 1 (2024-01-15): 10 family/vacation photos (assigned)');
+    console.log('- Day 2 (2024-01-16): 6 general photos (unassigned)');
+    console.log('- Day 3 (2024-01-17): 8 work photos (partial assignment)');
+    console.log('- OTHER/archive/: 5 older photos (archived)');
+    console.log('- OTHER/: 4 miscellaneous photos awaiting assignment');
 
   } catch (error) {
     console.error('❌ Error generating stock photos:', error);

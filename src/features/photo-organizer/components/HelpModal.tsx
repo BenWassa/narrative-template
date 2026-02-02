@@ -34,6 +34,24 @@ export default function HelpModal({
 
           <div className="space-y-6">
             <div>
+              <h3 className="font-semibold text-blue-400 mb-3">Workflow</h3>
+              <div className="space-y-2 text-sm text-gray-200">
+                <div>
+                  Single-click a photo in the grid to select it, then assign a
+                  bucket from the right sidebar (or press A-E/M/X).
+                </div>
+                <div>
+                  Double-click a photo to open the viewer. Use the filmstrip
+                  below to move through photos one by one.
+                </div>
+                <div>
+                  Use the Days sidebar to jump between days, or hide assigned
+                  photos to focus on what is left.
+                </div>
+              </div>
+            </div>
+
+            <div>
               <h3 className="font-semibold text-blue-400 mb-3">
                 MECE Categories
               </h3>

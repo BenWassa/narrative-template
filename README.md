@@ -32,55 +32,40 @@ node setup-demo.js
 
 1. **Install dependencies**: `npm install`
 2. **Start the app**: `npm run dev`
-3. **Create a demo project**:
-   - Click "New Project"
-   - Enter project name: "Narrative Demo"
-   - Click "Choose Folder" and select the `template-photos` folder in this directory
-   - Click "Create Project"
+3. **Explore the built-in demo project**:
+   - Run `npm run dev`, and the app will automatically load the Narrative Demo that ships with the repo.
+   - The demo data references the photos in `template-photos`, so you can just start exploring without granting folder access.
+   - If you replace the photos, regenerate the embedded project state with `node scripts/generate-demo-state.js`, or re-create the project manually by choosing the `template-photos` folder through the UI.
 
 ## Demo Project Structure
 
 The template comes with a pre-configured demo project showing:
 
-### `template-photos/2024-01-15/` - Fully Assigned Day (10 photos)
+### `template-photos/Day 1/` - Fully Assigned Day (10 photos)
 
 - **Family vacation photos**: Travel destinations, outdoor activities, family moments
 - All photos assigned to "Family Trip 2024" project
 - Shows the end result of photo organization
 - Demonstrates successful project assignment workflow
 
-### `template-photos/2024-01-16/` - Unassigned Day (6 photos)
+### `template-photos/Day 2/` - Unassigned Day (6 photos)
 
 - **General mixed photos**: Landscapes, city scenes, nature shots
 - Photos with no project assignments
 - Demonstrates the core problem the app solves
 - Ready for assignment to projects
 
-### `template-photos/2024-01-17/` - Partially Assigned Day (8 photos)
+### `template-photos/Day 3/` - Partially Assigned Day (8 photos)
 
 - **Professional work photos**: Office environments, meetings, workspaces
 - Mix of assigned and unassigned photos
 - Shows realistic organizational workflow
 - Demonstrates mid-process organization state
 
-### `template-photos/archive/` - Archived Photos (5 photos)
+### `template-photos/OTHER/` - Unclassified Content (best thought of as the OTHER bucket)
 
-- **Older photos from various dates**: Mix of different content types
-- Photos from 2023 marked as archived
-- Demonstrates archive functionality
-- Shows how old content is managed
-
-### `template-photos/` (Root Level) - Miscellaneous Photos (4 photos)
-
-- **Unorganized photos**: Various content types at root level
-- Shows initial state before organization
-- Demonstrates photos waiting to be processed
-
-### `template-photos/` (Root Level) - Miscellaneous Photos
-
-- 3-5 unorganized photos at root level
-- Shows photos waiting to be organized
-- Demonstrates initial state before organization
+- `OTHER/archive/` contains older (2023) photos that are marked as archived, so the demo highlights how the app keeps long-tail content accessible yet separated.
+- The four `misc_XXX.jpg` files sit directly inside `OTHER/` to showcase unassigned photos waiting for a day bucket assignment.
 
 ## Pre-configured Projects
 
@@ -107,6 +92,7 @@ If you want to modify the demo:
 - Edit project assignments through the app interface
 - Add/remove projects as needed
 - The app works exactly like the full version
+- The built-in demo state lives in `src/features/photo-organizer/demo/demoProjectState.ts`; regenerate it with `node scripts/generate-demo-state.js` if you update the photo set
 
 ## Technical Details
 

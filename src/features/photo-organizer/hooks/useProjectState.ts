@@ -23,6 +23,12 @@ import {
   ACTIVE_PROJECT_KEY,
   RECENT_PROJECTS_KEY,
 } from "../constants/projectKeys";
+import {
+  DEMO_PROJECT_ID,
+  DEMO_PROJECT_NAME,
+  DEMO_PROJECT_ROOT_PATH,
+  demoProjectState,
+} from "../demo/demoProjectState";
 
 const DEFAULT_SETTINGS: ProjectSettings = {
   autoDay: true,
@@ -34,6 +40,39 @@ const DEFAULT_SETTINGS: ProjectSettings = {
   },
 };
 const STATE_PREFIX = "narrative:projectState:";
+
+function createDemoRecentProject(): RecentProject {
+  const coverUrl = demoProjectState.photos[0]?.thumbnail;
+  return {
+    projectId: DEMO_PROJECT_ID,
+    projectName: DEMO_PROJECT_NAME,
+    rootPath: DEMO_PROJECT_ROOT_PATH,
+    lastOpened: Date.now(),
+    totalPhotos: demoProjectState.photos.length,
+    ...(coverUrl ? { coverUrl } : {}),
+  };
+}
+
+function mergeRecentsWithDemo(projects: RecentProject[]): RecentProject[] {
+  const demoIndex = projects.findIndex(
+    (project) => project.projectId === DEMO_PROJECT_ID
+  );
+
+  if (demoIndex === 0) {
+    return projects;
+  }
+
+  const demoEntry =
+    demoIndex === -1
+      ? createDemoRecentProject()
+      : {
+          ...projects[demoIndex],
+          lastOpened: Date.now(),
+        };
+
+  const filtered = projects.filter((_, index) => index !== demoIndex);
+  return [demoEntry, ...filtered].slice(0, 20);
+}
 
 interface UseProjectStateOptions {
   debugEnabled: boolean;
@@ -72,6 +111,26 @@ export function useProjectState({
   const [dayLabels, setDayLabels] = useState<Record<number, string>>({});
   const [dayContainers, setDayContainers] = useState<string[]>([]);
   const initializeRef = useRef(false); // Track if we've already initialized
+  const demoLoadedRef = useRef(false);
+
+  const loadDemoProject = useCallback(() => {
+    if (demoLoadedRef.current) return;
+    demoLoadedRef.current = true;
+
+    setPhotos(demoProjectState.photos);
+    setProjectName(DEMO_PROJECT_NAME);
+    setProjectRootPath(DEMO_PROJECT_ROOT_PATH);
+    setProjectFolderLabel(DEMO_PROJECT_ROOT_PATH);
+    setProjectSettings(demoProjectState.settings || DEFAULT_SETTINGS);
+    setDayLabels(demoProjectState.dayLabels || {});
+    setDayContainers(demoProjectState.dayContainers || []);
+    setShowOnboarding(false);
+    setShowWelcome(false);
+    setProjectError(null);
+    setPermissionRetryProjectId(null);
+    setProjectNeedingReselection(null);
+    safeLocalStorage.remove(ACTIVE_PROJECT_KEY);
+  }, []);
 
   const deriveProjectName = useCallback((rootPath: string) => {
     const parts = rootPath.split(/[/\\]/).filter(Boolean);
@@ -693,12 +752,13 @@ export function useProjectState({
     if (initializeRef.current) return;
     initializeRef.current = true;
 
+    let normalized: RecentProject[] = [];
     try {
       const storedRecentsRaw = safeLocalStorage.get(RECENT_PROJECTS_KEY);
       if (storedRecentsRaw) {
         try {
           const parsed = JSON.parse(storedRecentsRaw) as RecentProject[];
-          const normalized = Array.isArray(parsed)
+          normalized = Array.isArray(parsed)
             ? parsed.map((project) => ({
                 ...project,
                 projectId: project.projectId || project.rootPath,
@@ -711,28 +771,45 @@ export function useProjectState({
               uniqueProjects.set(p.projectId, p);
             }
           });
-          const deduped = Array.from(uniqueProjects.values());
+          normalized = Array.from(uniqueProjects.values());
 
-          if (JSON.stringify(deduped) !== JSON.stringify(parsed)) {
-            safeLocalStorage.set(RECENT_PROJECTS_KEY, JSON.stringify(deduped));
+          if (JSON.stringify(normalized) !== JSON.stringify(parsed)) {
+            safeLocalStorage.set(
+              RECENT_PROJECTS_KEY,
+              JSON.stringify(normalized)
+            );
           }
-
-          console.log(
-            "Loaded recent projects:",
-            deduped.map((p) => ({
-              id: p.projectId,
-              cover: p.coverUrl ? "has cover" : "no cover",
-            }))
-          );
-          setRecentProjects(deduped);
         } catch (err) {
           console.warn("Failed to parse recent projects from storage", err);
-          setRecentProjects([]);
+          normalized = [];
         }
       }
     } catch (err) {
-      setRecentProjects([]);
+      normalized = [];
     }
+
+    const recentsWithDemo = mergeRecentsWithDemo(normalized);
+    const shouldPersistRecents =
+      recentsWithDemo.length !== normalized.length ||
+      recentsWithDemo.some(
+        (project, index) => normalized[index]?.projectId !== project.projectId
+      );
+
+    if (shouldPersistRecents) {
+      safeLocalStorage.set(
+        RECENT_PROJECTS_KEY,
+        JSON.stringify(recentsWithDemo)
+      );
+    }
+
+    setRecentProjects(recentsWithDemo);
+    console.log(
+      "Loaded recent projects:",
+      recentsWithDemo.map((project) => ({
+        id: project.projectId,
+        cover: project.coverUrl ? "has cover" : "no cover",
+      }))
+    );
 
     const activeProjectId = safeLocalStorage.get(ACTIVE_PROJECT_KEY);
     const isTest =
@@ -761,9 +838,9 @@ export function useProjectState({
         })();
       }
     } else {
-      setShowWelcome(true);
+      loadDemoProject();
     }
-  }, []); // Empty array - run only once on mount
+  }, [loadDemoProject]); // Empty array - run only once on mount
 
   return {
     photos,

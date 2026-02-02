@@ -1,4 +1,4 @@
-import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
+import { openDB, type DBSchema, type IDBPDatabase } from "idb";
 
 interface ThumbnailDB extends DBSchema {
   thumbnails: {
@@ -17,10 +17,10 @@ class ThumbnailCache {
 
   private async init() {
     if (this.db) return;
-    this.db = await openDB<ThumbnailDB>('narrative-thumbnails', 1, {
+    this.db = await openDB<ThumbnailDB>("narrative-thumbnails", 1, {
       upgrade(db) {
-        if (!db.objectStoreNames.contains('thumbnails')) {
-          db.createObjectStore('thumbnails', { keyPath: 'id' });
+        if (!db.objectStoreNames.contains("thumbnails")) {
+          db.createObjectStore("thumbnails", { keyPath: "id" });
         }
       },
     });
@@ -32,7 +32,7 @@ class ThumbnailCache {
     }
 
     await this.init();
-    const entry = await this.db!.get('thumbnails', photoId);
+    const entry = await this.db!.get("thumbnails", photoId);
     if (!entry?.blob) return null;
 
     const url = URL.createObjectURL(entry.blob);
@@ -53,7 +53,7 @@ class ThumbnailCache {
       this.objectUrls.delete(photoId);
     }
 
-    await this.db!.put('thumbnails', {
+    await this.db!.put("thumbnails", {
       id: photoId,
       blob,
       timestamp: Date.now(),
@@ -62,9 +62,9 @@ class ThumbnailCache {
 
   async clear() {
     await this.init();
-    await this.db!.clear('thumbnails');
+    await this.db!.clear("thumbnails");
 
-    this.objectUrls.forEach(url => {
+    this.objectUrls.forEach((url) => {
       try {
         URL.revokeObjectURL(url);
       } catch (error) {

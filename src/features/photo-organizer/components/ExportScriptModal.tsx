@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { X, Download, Copy, Info } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { X, Download, Copy, Info } from "lucide-react";
 
 interface ExportScriptModalProps {
   isOpen: boolean;
   scriptText: string;
-  copyStatus: 'idle' | 'copied' | 'failed';
+  copyStatus: "idle" | "copied" | "failed";
   detectedProjectPath: string;
   onClose: () => void;
   onCopyScript: () => Promise<void>;
@@ -43,7 +43,9 @@ export default function ExportScriptModal({
         <div className="px-6 py-4 border-b border-gray-800 flex items-center justify-between bg-gray-800/50">
           <div>
             <h2 className="text-xl font-bold text-gray-100">Export Script</h2>
-            <p className="text-sm text-gray-400 mt-1">Organize and copy your photos</p>
+            <p className="text-sm text-gray-400 mt-1">
+              Organize and copy your photos
+            </p>
           </div>
           <button
             onClick={onClose}
@@ -57,7 +59,9 @@ export default function ExportScriptModal({
         <div className="px-6 py-5 space-y-5 max-h-[calc(100vh-150px)] overflow-y-auto">
           {/* Project Path Input */}
           <div className="space-y-2">
-            <label className="block text-sm font-semibold text-gray-200">Project Directory</label>
+            <label className="block text-sm font-semibold text-gray-200">
+              Project Directory
+            </label>
             <input
               type="text"
               value={projectPath}
@@ -65,7 +69,9 @@ export default function ExportScriptModal({
               placeholder="/Users/you/Photos/Trip-to-Japan"
               className="w-full px-4 py-3 rounded-lg border border-gray-700 bg-gray-950 text-gray-100 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
-            <p className="text-xs text-gray-500">Full path to your photo project folder</p>
+            <p className="text-xs text-gray-500">
+              Full path to your photo project folder
+            </p>
           </div>
 
           {/* Info Box */}
@@ -77,7 +83,7 @@ export default function ExportScriptModal({
                 <li>1. Download the script below</li>
                 <li>2. Open Terminal in your project folder</li>
                 <li>
-                  3. Run:{' '}
+                  3. Run:{" "}
                   <code className="bg-blue-900/50 px-1.5 py-0.5 rounded font-mono">
                     bash narrative-export.sh
                   </code>
@@ -92,7 +98,9 @@ export default function ExportScriptModal({
               <label className="text-sm font-semibold text-gray-200">
                 Script (narrative-export.sh)
               </label>
-              <span className="text-xs text-gray-500">{scriptText.split('\n').length} lines</span>
+              <span className="text-xs text-gray-500">
+                {scriptText.split("\n").length} lines
+              </span>
             </div>
             <div className="relative">
               <textarea
@@ -120,12 +128,14 @@ export default function ExportScriptModal({
               <Copy className="w-4 h-4" />
               Copy to Clipboard
             </button>
-            {copyStatus === 'copied' && (
+            {copyStatus === "copied" && (
               <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-green-950/50 border border-green-900/50">
-                <span className="text-sm text-green-300 font-medium">✓ Copied to clipboard!</span>
+                <span className="text-sm text-green-300 font-medium">
+                  ✓ Copied to clipboard!
+                </span>
               </div>
             )}
-            {copyStatus === 'failed' && (
+            {copyStatus === "failed" && (
               <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-red-950/50 border border-red-900/50">
                 <span className="text-sm text-red-300 font-medium">
                   Copy failed. Use download instead.

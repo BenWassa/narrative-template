@@ -1,6 +1,6 @@
-import { type Dispatch, type SetStateAction, useEffect, useState } from 'react';
-import { Heart, Pencil, Save, X as XIcon } from 'lucide-react';
-import type { ProjectPhoto } from '../services/projectService';
+import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
+import { Heart, Pencil, Save, X as XIcon } from "lucide-react";
+import type { ProjectPhoto } from "../services/projectService";
 
 interface Bucket {
   key: string;
@@ -41,7 +41,7 @@ export default function RightSidebar({
   onToggleFavorite,
 }: RightSidebarProps) {
   const [editingName, setEditingName] = useState(false);
-  const [nameInput, setNameInput] = useState('');
+  const [nameInput, setNameInput] = useState("");
 
   useEffect(() => {
     setEditingName(false);
@@ -49,8 +49,11 @@ export default function RightSidebar({
 
   if (selectedPhotos.size === 0) return null;
 
-  const selectedId = selectedPhotos.size === 1 ? Array.from(selectedPhotos)[0] : null;
-  const selectedPhoto = selectedId ? photos.find(p => p.id === selectedId) : null;
+  const selectedId =
+    selectedPhotos.size === 1 ? Array.from(selectedPhotos)[0] : null;
+  const selectedPhoto = selectedId
+    ? photos.find((p) => p.id === selectedId)
+    : null;
 
   return (
     <aside className="w-80 border-l border-gray-800 bg-gray-900 overflow-y-auto">
@@ -58,10 +61,18 @@ export default function RightSidebar({
         <div className="mb-6">
           {selectedPhotos.size === 1 && selectedPhoto ? (
             <>
-              {selectedPhoto.mimeType?.startsWith('video/') ? (
-                <video src={selectedPhoto.thumbnail} className="w-full rounded-lg" controls />
+              {selectedPhoto.mimeType?.startsWith("video/") ? (
+                <video
+                  src={selectedPhoto.thumbnail}
+                  className="w-full rounded-lg"
+                  controls
+                />
               ) : (
-                <img src={selectedPhoto.thumbnail} alt="Selected" className="w-full rounded-lg" />
+                <img
+                  src={selectedPhoto.thumbnail}
+                  alt="Selected"
+                  className="w-full rounded-lg"
+                />
               )}
               <div className="mt-2 text-xs text-gray-400 font-mono break-all">
                 {!editingName ? (
@@ -69,7 +80,11 @@ export default function RightSidebar({
                     <div>{selectedPhoto.currentName}</div>
                     <button
                       onClick={() => {
-                        setNameInput(selectedPhoto.currentName || selectedPhoto.originalName || '');
+                        setNameInput(
+                          selectedPhoto.currentName ||
+                            selectedPhoto.originalName ||
+                            ""
+                        );
                         setEditingName(true);
                       }}
                       className="p-1 ml-2"
@@ -82,13 +97,15 @@ export default function RightSidebar({
                   <div className="flex gap-2">
                     <input
                       value={nameInput}
-                      onChange={e => setNameInput(e.target.value)}
+                      onChange={(e) => setNameInput(e.target.value)}
                       className="w-full px-2 py-1 rounded bg-gray-800 text-sm text-gray-100"
                     />
                     <button
                       onClick={() => {
-                        const newPhotos = photos.map(ph =>
-                          ph.id === selectedId ? { ...ph, currentName: nameInput } : ph,
+                        const newPhotos = photos.map((ph) =>
+                          ph.id === selectedId
+                            ? { ...ph, currentName: nameInput }
+                            : ph
                         );
                         onSaveToHistory(newPhotos);
                         setEditingName(false);
@@ -110,34 +127,40 @@ export default function RightSidebar({
               </div>
             </>
           ) : (
-            <div className="text-sm text-gray-300">{selectedPhotos.size} selected</div>
+            <div className="text-sm text-gray-300">
+              {selectedPhotos.size} selected
+            </div>
           )}
         </div>
 
         <div className="space-y-4 mb-6">
-          <h3 className="text-sm font-semibold text-gray-300 mb-3">Assign Day</h3>
+          <h3 className="text-sm font-semibold text-gray-300 mb-3">
+            Assign Day
+          </h3>
           <div className="flex gap-2 items-center">
             <select
               aria-label="Assign to..."
-              onChange={e => {
+              onChange={(e) => {
                 const val = e.target.value;
                 if (!val) return;
                 const dayNum =
-                  val === 'new' ? Math.max(0, ...days.map(d => d[0])) + 1 : Number(val);
+                  val === "new"
+                    ? Math.max(0, ...days.map((d) => d[0])) + 1
+                    : Number(val);
                 const targets = Array.from(selectedPhotos);
-                const newPhotos = photos.map(ph =>
-                  targets.includes(ph.id) ? { ...ph, day: dayNum } : ph,
+                const newPhotos = photos.map((ph) =>
+                  targets.includes(ph.id) ? { ...ph, day: dayNum } : ph
                 );
                 onSaveToHistory(newPhotos);
-                if (val === 'new') {
-                  onSetDayLabels(prev => ({
+                if (val === "new") {
+                  onSetDayLabels((prev) => ({
                     ...prev,
-                    [dayNum]: `Day ${String(dayNum).padStart(2, '0')}`,
+                    [dayNum]: `Day ${String(dayNum).padStart(2, "0")}`,
                   }));
                   onPersistState(newPhotos);
                 }
                 onSetSelectedDay(dayNum);
-                onSetCurrentView('days');
+                onSetCurrentView("days");
                 onSetSelectedPhotos(new Set());
               }}
               className="px-3 py-2 rounded bg-gray-800"
@@ -145,11 +168,16 @@ export default function RightSidebar({
             >
               <option value="">Assign to...</option>
               {days.map(([d]) => (
-                <option key={d} value={d}>{`Day ${String(d).padStart(2, '0')}`}</option>
+                <option key={d} value={d}>{`Day ${String(d).padStart(
+                  2,
+                  "0"
+                )}`}</option>
               ))}
               <option value="new">Create new day</option>
             </select>
-            <div className="text-xs text-gray-400">Assign selected photos to a day folder</div>
+            <div className="text-xs text-gray-400">
+              Assign selected photos to a day folder
+            </div>
           </div>
           <button
             onClick={() => {
@@ -163,11 +191,15 @@ export default function RightSidebar({
         </div>
 
         <div className="space-y-2 mb-6">
-          <h3 className="text-sm font-semibold text-gray-300 mb-3">Assign Category</h3>
-          {buckets.map(bucket => (
+          <h3 className="text-sm font-semibold text-gray-300 mb-3">
+            Assign Category
+          </h3>
+          {buckets.map((bucket) => (
             <button
               key={bucket.key}
-              onClick={() => onAssignBucket(Array.from(selectedPhotos), bucket.key)}
+              onClick={() =>
+                onAssignBucket(Array.from(selectedPhotos), bucket.key)
+              }
               className={`w-full text-left px-4 py-3 rounded-lg transition-all ${bucket.color} hover:brightness-110 text-white`}
             >
               <div className="flex items-center justify-between">
@@ -186,13 +218,15 @@ export default function RightSidebar({
             onClick={() => onToggleFavorite(Array.from(selectedPhotos))}
             className={`w-full px-4 py-2 rounded-lg flex items-center gap-2 transition-colors ${
               selectedPhotos.size === 1 && selectedPhoto?.favorite
-                ? 'bg-yellow-600 hover:bg-yellow-700'
-                : 'bg-gray-800 hover:bg-gray-700'
+                ? "bg-yellow-600 hover:bg-yellow-700"
+                : "bg-gray-800 hover:bg-gray-700"
             }`}
           >
             <Heart
               className={`w-4 h-4 ${
-                selectedPhotos.size === 1 && selectedPhoto?.favorite ? 'fill-current' : ''
+                selectedPhotos.size === 1 && selectedPhoto?.favorite
+                  ? "fill-current"
+                  : ""
               }`}
             />
             Toggle Favorite (F)

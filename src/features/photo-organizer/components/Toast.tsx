@@ -1,9 +1,9 @@
-import React from 'react';
-import { X } from 'lucide-react';
+import React from "react";
+import { X } from "lucide-react";
 
 export interface ToastMessage {
   message: string;
-  tone: 'info' | 'error';
+  tone: "info" | "error";
   actionLabel?: string;
   onAction?: () => void;
 }
@@ -20,7 +20,9 @@ export default function Toast({ toast, onDismiss }: ToastProps) {
     <div className="fixed bottom-6 right-6 z-50">
       <div
         className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm shadow-lg ${
-          toast.tone === 'error' ? 'bg-red-600 text-white' : 'bg-gray-800 text-gray-100'
+          toast.tone === "error"
+            ? "bg-red-600 text-white"
+            : "bg-gray-800 text-gray-100"
         }`}
         role="status"
         aria-live="polite"

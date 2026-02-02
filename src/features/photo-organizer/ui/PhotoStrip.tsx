@@ -1,6 +1,6 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { ChevronLeft, ChevronRight, Video } from 'lucide-react';
-import { ProjectPhoto } from '../services/projectService';
+import React, { useRef, useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight, Video } from "lucide-react";
+import { ProjectPhoto } from "../services/projectService";
 
 interface PhotoStripProps {
   photos: ProjectPhoto[];
@@ -10,13 +10,15 @@ interface PhotoStripProps {
 }
 
 // Helper function to extract first frame from video
-const generateVideoThumbnail = async (fileHandle: any): Promise<string | null> => {
+const generateVideoThumbnail = async (
+  fileHandle: any
+): Promise<string | null> => {
   try {
     const file = await fileHandle.getFile();
-    return new Promise(resolve => {
-      const video = document.createElement('video');
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
+    return new Promise((resolve) => {
+      const video = document.createElement("video");
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
 
       const handleLoadedMetadata = () => {
         canvas.width = video.videoWidth;
@@ -27,27 +29,27 @@ const generateVideoThumbnail = async (fileHandle: any): Promise<string | null> =
       const handleSeeked = () => {
         if (ctx) {
           ctx.drawImage(video, 0, 0);
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-          video.removeEventListener('loadedmetadata', handleLoadedMetadata);
-          video.removeEventListener('seeked', handleSeeked);
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+          video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+          video.removeEventListener("seeked", handleSeeked);
           resolve(dataUrl);
         }
       };
 
-      video.addEventListener('loadedmetadata', handleLoadedMetadata);
-      video.addEventListener('seeked', handleSeeked);
+      video.addEventListener("loadedmetadata", handleLoadedMetadata);
+      video.addEventListener("seeked", handleSeeked);
       video.src = URL.createObjectURL(file);
       video.load();
 
       // Fallback after 2 seconds
       setTimeout(() => {
-        video.removeEventListener('loadedmetadata', handleLoadedMetadata);
-        video.removeEventListener('seeked', handleSeeked);
+        video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+        video.removeEventListener("seeked", handleSeeked);
         resolve(null);
       }, 2000);
     });
   } catch (error) {
-    console.error('Failed to generate video thumbnail:', error);
+    console.error("Failed to generate video thumbnail:", error);
     return null;
   }
 };
@@ -60,19 +62,21 @@ export const PhotoStrip: React.FC<PhotoStripProps> = ({
 }) => {
   const stripRef = useRef<HTMLDivElement>(null);
   const currentPhotoRef = useRef<HTMLButtonElement>(null);
-  const [videoThumbnails, setVideoThumbnails] = useState<Record<string, string | null>>({});
+  const [videoThumbnails, setVideoThumbnails] = useState<
+    Record<string, string | null>
+  >({});
 
   // Generate thumbnails for videos on mount
   useEffect(() => {
     const generateThumbnails = async () => {
       const videoPhotos = photos.filter(
-        p => p.mimeType?.startsWith('video/') && !videoThumbnails[p.id],
+        (p) => p.mimeType?.startsWith("video/") && !videoThumbnails[p.id]
       );
 
       for (const photo of videoPhotos) {
         if (photo.fileHandle) {
           const thumbnail = await generateVideoThumbnail(photo.fileHandle);
-          setVideoThumbnails(prev => ({
+          setVideoThumbnails((prev) => ({
             ...prev,
             [photo.id]: thumbnail,
           }));
@@ -93,52 +97,55 @@ export const PhotoStrip: React.FC<PhotoStripProps> = ({
       const photoRect = photoElement.getBoundingClientRect();
 
       // Check if current photo is outside visible area
-      if (photoRect.left < stripRect.left || photoRect.right > stripRect.right) {
+      if (
+        photoRect.left < stripRect.left ||
+        photoRect.right > stripRect.right
+      ) {
         photoElement.scrollIntoView({
-          behavior: 'smooth',
-          block: 'nearest',
-          inline: 'center',
+          behavior: "smooth",
+          block: "nearest",
+          inline: "center",
         });
       }
     }
   }, [currentPhotoId]);
 
-  const handleScroll = (direction: 'left' | 'right') => {
+  const handleScroll = (direction: "left" | "right") => {
     if (stripRef.current) {
       const scrollAmount = stripRef.current.clientWidth * 0.7;
       stripRef.current.scrollBy({
-        left: direction === 'right' ? scrollAmount : -scrollAmount,
-        behavior: 'smooth',
+        left: direction === "right" ? scrollAmount : -scrollAmount,
+        behavior: "smooth",
       });
     }
   };
 
-  const currentIndex = photos.findIndex(p => p.id === currentPhotoId);
+  const currentIndex = photos.findIndex((p) => p.id === currentPhotoId);
   const canScrollLeft = currentIndex > 0;
   const canScrollRight = currentIndex < photos.length - 1;
 
   // Separate photos and videos
-  const stillPhotos = photos.filter(p => !p.mimeType?.startsWith('video/'));
-  const videos = photos.filter(p => p.mimeType?.startsWith('video/'));
+  const stillPhotos = photos.filter((p) => !p.mimeType?.startsWith("video/"));
+  const videos = photos.filter((p) => p.mimeType?.startsWith("video/"));
 
   const renderPhotoItem = (photo: ProjectPhoto, index: number) => {
     const isActive = photo.id === currentPhotoId;
     const bucketInfo = photo.bucket
       ? (() => {
           const colors: Record<string, string> = {
-            A: 'bg-blue-500',
-            B: 'bg-purple-500',
-            C: 'bg-green-500',
-            D: 'bg-orange-500',
-            E: 'bg-yellow-500',
-            M: 'bg-indigo-500',
-            X: 'bg-gray-500',
+            A: "bg-blue-500",
+            B: "bg-purple-500",
+            C: "bg-green-500",
+            D: "bg-orange-500",
+            E: "bg-yellow-500",
+            M: "bg-indigo-500",
+            X: "bg-gray-500",
           };
-          return colors[photo.bucket] || 'bg-gray-500';
+          return colors[photo.bucket] || "bg-gray-500";
         })()
       : null;
 
-    const thumbnailUrl = photo.mimeType?.startsWith('video/')
+    const thumbnailUrl = photo.mimeType?.startsWith("video/")
       ? videoThumbnails[photo.id] || photo.thumbnail
       : photo.thumbnail;
 
@@ -148,18 +155,24 @@ export const PhotoStrip: React.FC<PhotoStripProps> = ({
         ref={isActive ? currentPhotoRef : null}
         onClick={() => onSelectPhoto(photo.id)}
         className={`relative flex-shrink-0 group ${
-          isActive ? 'ring-4 ring-blue-500 shadow-xl scale-110' : 'hover:ring-2 hover:ring-gray-600'
+          isActive
+            ? "ring-4 ring-blue-500 shadow-xl scale-110"
+            : "hover:ring-2 hover:ring-gray-600"
         } transition-all duration-200 rounded-lg overflow-hidden`}
         style={{
-          width: '120px',
-          height: '90px',
+          width: "120px",
+          height: "90px",
         }}
-        aria-label={`${photo.currentName}${isActive ? ' (current)' : ''}`}
-        aria-current={isActive ? 'true' : undefined}
+        aria-label={`${photo.currentName}${isActive ? " (current)" : ""}`}
+        aria-current={isActive ? "true" : undefined}
       >
         {/* Thumbnail */}
         {thumbnailUrl ? (
-          <img src={thumbnailUrl} alt={photo.currentName} className="w-full h-full object-cover" />
+          <img
+            src={thumbnailUrl}
+            alt={photo.currentName}
+            className="w-full h-full object-cover"
+          />
         ) : (
           <div className="w-full h-full bg-gray-800 flex items-center justify-center">
             <span className="text-xs text-gray-500 text-center px-2 break-words">
@@ -169,7 +182,7 @@ export const PhotoStrip: React.FC<PhotoStripProps> = ({
         )}
 
         {/* Video indicator */}
-        {photo.mimeType?.startsWith('video/') && (
+        {photo.mimeType?.startsWith("video/") && (
           <div className="absolute top-1 left-1 bg-black/70 rounded p-1">
             <Video className="w-3 h-3 text-white" />
           </div>
@@ -219,7 +232,7 @@ export const PhotoStrip: React.FC<PhotoStripProps> = ({
       {/* Scroll Left Button */}
       {canScrollLeft && (
         <button
-          onClick={() => handleScroll('left')}
+          onClick={() => handleScroll("left")}
           className="absolute left-2 top-1/2 -translate-y-1/2 z-10 p-2 bg-gray-950/80 hover:bg-gray-800 rounded-lg text-gray-300 hover:text-white transition-colors shadow-lg"
           aria-label="Scroll left"
         >
@@ -232,14 +245,16 @@ export const PhotoStrip: React.FC<PhotoStripProps> = ({
         ref={stripRef}
         className="flex items-center gap-3 px-12 py-4 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900"
         style={{
-          scrollbarWidth: 'thin',
+          scrollbarWidth: "thin",
         }}
       >
         {/* Photos Section */}
         {stillPhotos.length > 0 && (
           <>
             {stillPhotos.map((photo, index) => renderPhotoItem(photo, index))}
-            {videos.length > 0 && <div className="h-20 border-l border-gray-700 mx-2" />}
+            {videos.length > 0 && (
+              <div className="h-20 border-l border-gray-700 mx-2" />
+            )}
           </>
         )}
 
@@ -247,7 +262,7 @@ export const PhotoStrip: React.FC<PhotoStripProps> = ({
         {videos.length > 0 && (
           <div className="flex gap-3">
             {videos.map((video, index) => {
-              const photoIndex = photos.findIndex(p => p.id === video.id);
+              const photoIndex = photos.findIndex((p) => p.id === video.id);
               return renderPhotoItem(video, photoIndex);
             })}
           </div>
@@ -257,7 +272,7 @@ export const PhotoStrip: React.FC<PhotoStripProps> = ({
       {/* Scroll Right Button */}
       {canScrollRight && (
         <button
-          onClick={() => handleScroll('right')}
+          onClick={() => handleScroll("right")}
           className="absolute right-2 top-1/2 -translate-y-1/2 z-10 p-2 bg-gray-950/80 hover:bg-gray-800 rounded-lg text-gray-300 hover:text-white transition-colors shadow-lg"
           aria-label="Scroll right"
         >

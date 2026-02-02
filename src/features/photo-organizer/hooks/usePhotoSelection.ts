@@ -1,5 +1,5 @@
-import { type MouseEvent, useCallback, useRef, useState } from 'react';
-import { ProjectPhoto } from '../services/projectService';
+import { type MouseEvent, useCallback, useRef, useState } from "react";
+import { ProjectPhoto } from "../services/projectService";
 
 interface UsePhotoSelectionOptions {
   filteredPhotos: ProjectPhoto[];
@@ -16,7 +16,9 @@ export function usePhotoSelection({
 }: UsePhotoSelectionOptions) {
   const [selectedPhotos, setSelectedPhotos] = useState<Set<string>>(new Set());
   const [focusedPhoto, setFocusedPhoto] = useState<string | null>(null);
-  const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
+  const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(
+    null
+  );
   const lastSelectedIndexRef = useRef<number | null>(null);
 
   const resetSelection = useCallback(() => {
@@ -27,7 +29,12 @@ export function usePhotoSelection({
   }, []);
 
   const handleSelectPhoto = useCallback(
-    async (e: MouseEvent, photoId: string, index: number, orderedList = filteredPhotos) => {
+    async (
+      e: MouseEvent,
+      photoId: string,
+      index: number,
+      orderedList = filteredPhotos
+    ) => {
       if (
         e.shiftKey &&
         lastSelectedIndexRef.current !== null &&
@@ -35,7 +42,7 @@ export function usePhotoSelection({
       ) {
         const start = Math.min(lastSelectedIndexRef.current, index);
         const end = Math.max(lastSelectedIndexRef.current, index);
-        const rangeIds = orderedList.slice(start, end + 1).map(p => p.id);
+        const rangeIds = orderedList.slice(start, end + 1).map((p) => p.id);
         setSelectedPhotos(new Set(rangeIds));
         setFocusedPhoto(photoId);
         setLastSelectedIndex(index);
@@ -64,7 +71,13 @@ export function usePhotoSelection({
         setCoverSelectionMode(false);
       }
     },
-    [coverSelectionMode, filteredPhotos, selectedPhotos, setCoverForPhotoId, setCoverSelectionMode],
+    [
+      coverSelectionMode,
+      filteredPhotos,
+      selectedPhotos,
+      setCoverForPhotoId,
+      setCoverSelectionMode,
+    ]
   );
 
   return {

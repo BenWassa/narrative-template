@@ -1,6 +1,6 @@
 {
   "name": "narrative-portfolio-template",
-  "version": "1.0.0",
+  "version": "4.1.3",
   "description": "Portfolio template version of Narrative - a photo organization app with pre-configured demo project",
   "private": true,
   "engines": {

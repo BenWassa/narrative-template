@@ -58,7 +58,7 @@ class VersionManager {
    * Get version components (major, minor, patch)
    */
   getVersionComponents(): { major: number; minor: number; patch: number } {
-    const [major, minor, patch] = this.version.split('.').map(Number);
+    const [major, minor, patch] = this.version.split(".").map(Number);
     return { major, minor, patch };
   }
 
@@ -66,8 +66,8 @@ class VersionManager {
    * Compare versions (returns -1 if a < b, 0 if equal, 1 if a > b)
    */
   compareVersions(a: string, b: string): number {
-    const aComponents = a.split('.').map(Number);
-    const bComponents = b.split('.').map(Number);
+    const aComponents = a.split(".").map(Number);
+    const bComponents = b.split(".").map(Number);
 
     for (let i = 0; i < 3; i++) {
       if (aComponents[i] < bComponents[i]) return -1;
@@ -83,14 +83,18 @@ class VersionManager {
     try {
       // Only attempt runtime version fetching in development environments
       // where package.json is actually available at the root path
-      if (import.meta.env.MODE === 'test' || import.meta.env.DEV || import.meta.env.PROD) {
+      if (
+        import.meta.env.MODE === "test" ||
+        import.meta.env.DEV ||
+        import.meta.env.PROD
+      ) {
         return null;
       }
 
-      const response = await fetch('/package.json');
+      const response = await fetch("/package.json");
       if (!response.ok) {
         if (!import.meta.env.DEV) {
-          console.warn('Failed to fetch package.json for version check');
+          console.warn("Failed to fetch package.json for version check");
         }
         return null;
       }
@@ -99,7 +103,7 @@ class VersionManager {
       return pkg.version || null;
     } catch (error) {
       if (!import.meta.env.DEV) {
-        console.warn('Error fetching runtime version:', error);
+        console.warn("Error fetching runtime version:", error);
       }
       return null;
     }
@@ -124,17 +128,19 @@ function validateVersionConsistency(): { isValid: boolean; errors: string[] } {
 
   // Check if version is defined
   if (!APP_VERSION) {
-    errors.push('APP_VERSION is not defined');
+    errors.push("APP_VERSION is not defined");
   }
 
   // Check if version format is valid
   if (!versionManager.isCurrentVersionValid()) {
-    errors.push(`Invalid version format: ${APP_VERSION}. Expected semver format (x.y.z)`);
+    errors.push(
+      `Invalid version format: ${APP_VERSION}. Expected semver format (x.y.z)`
+    );
   }
 
   // Check if version is not a placeholder/test version
-  if (APP_VERSION === '0.0.0') {
-    errors.push('Version is still set to test placeholder (0.0.0)');
+  if (APP_VERSION === "0.0.0") {
+    errors.push("Version is still set to test placeholder (0.0.0)");
   }
 
   return {
@@ -146,14 +152,14 @@ function validateVersionConsistency(): { isValid: boolean; errors: string[] } {
 // Development helper - logs version info in development
 const DEBUG_LOGS =
   import.meta.env.DEV &&
-  typeof window !== 'undefined' &&
-  window.localStorage?.getItem('narrative:debug') === '1';
+  typeof window !== "undefined" &&
+  window.localStorage?.getItem("narrative:debug") === "1";
 
 if (DEBUG_LOGS) {
-  console.log('🚀 Narrative Version:', versionManager.getDisplayVersion());
+  console.log("🚀 Narrative Version:", versionManager.getDisplayVersion());
 
   const validation = validateVersionConsistency();
   if (!validation.isValid) {
-    console.warn('⚠️ Version validation issues:', validation.errors);
+    console.warn("⚠️ Version validation issues:", validation.errors);
   }
 }

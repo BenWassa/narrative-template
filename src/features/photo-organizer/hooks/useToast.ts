@@ -1,8 +1,8 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef } from "react";
 
 export interface ToastMessage {
   message: string;
-  tone: 'info' | 'error';
+  tone: "info" | "error";
   actionLabel?: string;
   onAction?: () => void;
 }
@@ -22,10 +22,19 @@ export function useToast() {
   const showToast = useCallback(
     (
       message: string,
-      tone: 'info' | 'error' = 'info',
-      options?: { durationMs?: number; actionLabel?: string; onAction?: () => void },
+      tone: "info" | "error" = "info",
+      options?: {
+        durationMs?: number;
+        actionLabel?: string;
+        onAction?: () => void;
+      }
     ) => {
-      setToast({ message, tone, actionLabel: options?.actionLabel, onAction: options?.onAction });
+      setToast({
+        message,
+        tone,
+        actionLabel: options?.actionLabel,
+        onAction: options?.onAction,
+      });
       if (toastTimerRef.current) {
         window.clearTimeout(toastTimerRef.current);
       }
@@ -35,7 +44,7 @@ export function useToast() {
         toastTimerRef.current = null;
       }, durationMs);
     },
-    [],
+    []
   );
 
   return {

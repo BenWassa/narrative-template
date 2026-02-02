@@ -1,6 +1,6 @@
-import React from 'react';
-import { X } from 'lucide-react';
-import { ProjectPhoto } from '../services/projectService';
+import React from "react";
+import { X } from "lucide-react";
+import { ProjectPhoto } from "../services/projectService";
 
 interface FullscreenOverlayProps {
   photoId: string | null;
@@ -8,10 +8,14 @@ interface FullscreenOverlayProps {
   onClose: () => void;
 }
 
-export default function FullscreenOverlay({ photoId, photos, onClose }: FullscreenOverlayProps) {
+export default function FullscreenOverlay({
+  photoId,
+  photos,
+  onClose,
+}: FullscreenOverlayProps) {
   if (!photoId) return null;
 
-  const photo = photos.find(p => p.id === photoId);
+  const photo = photos.find((p) => p.id === photoId);
   if (!photo) return null;
 
   return (
@@ -23,7 +27,7 @@ export default function FullscreenOverlay({ photoId, photos, onClose }: Fullscre
         <X className="w-6 h-6" />
       </button>
 
-      {photo.mimeType?.startsWith('video/') ? (
+      {photo.mimeType?.startsWith("video/") ? (
         <video
           src={photo.thumbnail}
           controls

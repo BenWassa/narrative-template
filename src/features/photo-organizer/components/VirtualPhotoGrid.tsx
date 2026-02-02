@@ -1,7 +1,7 @@
-import React, { useCallback, useMemo } from 'react';
-import { Grid } from 'react-window';
+import React, { useCallback, useMemo } from "react";
+import { Grid } from "react-window";
 
-import type { ProjectPhoto } from '../services/projectService';
+import type { ProjectPhoto } from "../services/projectService";
 
 interface VirtualPhotoGridProps {
   photos: ProjectPhoto[];
@@ -33,7 +33,7 @@ export default function VirtualPhotoGrid({
   const resolvedWidth = width ?? columnCount * cellSize;
   const rowCount = useMemo(
     () => Math.ceil(photos.length / columnCount),
-    [photos.length, columnCount],
+    [photos.length, columnCount]
   );
 
   const Cell = useCallback(
@@ -58,7 +58,7 @@ export default function VirtualPhotoGrid({
           onClick={() => onSelectPhoto(photo.id)}
           onDoubleClick={() => onOpenViewer(photo.id)}
           className={`cursor-pointer rounded-lg overflow-hidden ${
-            isSelected ? 'ring-2 ring-blue-500' : ''
+            isSelected ? "ring-2 ring-blue-500" : ""
           }`}
         >
           {photo.thumbnail ? (
@@ -76,7 +76,7 @@ export default function VirtualPhotoGrid({
         </div>
       );
     },
-    [columnCount, gap, onOpenViewer, onSelectPhoto, photos, selectedPhotos],
+    [columnCount, gap, onOpenViewer, onSelectPhoto, photos, selectedPhotos]
   );
 
   return (

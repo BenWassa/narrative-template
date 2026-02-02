@@ -1,6 +1,11 @@
-import { useCallback, useState, type Dispatch, type SetStateAction } from 'react';
+import {
+  useCallback,
+  useState,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 
-import type { ProjectPhoto } from '../services/projectService';
+import type { ProjectPhoto } from "../services/projectService";
 
 interface UseDayEditingOptions {
   photos: ProjectPhoto[];
@@ -8,9 +13,13 @@ interface UseDayEditingOptions {
   setDayLabels: Dispatch<SetStateAction<Record<number, string>>>;
 }
 
-export function useDayEditing({ photos, persistState, setDayLabels }: UseDayEditingOptions) {
+export function useDayEditing({
+  photos,
+  persistState,
+  setDayLabels,
+}: UseDayEditingOptions) {
   const [editingDay, setEditingDay] = useState<number | null>(null);
-  const [editingDayName, setEditingDayName] = useState('');
+  const [editingDayName, setEditingDayName] = useState("");
 
   const startEditingDay = useCallback((day: number, name: string) => {
     setEditingDay(day);
@@ -19,11 +28,11 @@ export function useDayEditing({ photos, persistState, setDayLabels }: UseDayEdit
 
   const saveDayName = useCallback(
     (day: number) => {
-      setDayLabels(prev => ({ ...prev, [day]: editingDayName }));
+      setDayLabels((prev) => ({ ...prev, [day]: editingDayName }));
       persistState(photos);
       setEditingDay(null);
     },
-    [editingDayName, persistState, photos, setDayLabels],
+    [editingDayName, persistState, photos, setDayLabels]
   );
 
   const cancelEditingDay = useCallback(() => {

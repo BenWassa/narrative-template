@@ -1,7 +1,7 @@
-import React from 'react';
-import { createRoot } from 'react-dom/client';
-import App from './App';
-import './styles/tailwind.css';
+import React from "react";
+import { createRoot } from "react-dom/client";
+import App from "./App";
+import "./styles/tailwind.css";
 
 /**
  * Application entry point
@@ -20,13 +20,15 @@ import './styles/tailwind.css';
  * @see https://react.dev/reference/react/StrictMode
  * @see docs/FRONTEND_ARCHITECTURE.md for architecture details
  */
-const rootEl = document.getElementById('root');
+const rootEl = document.getElementById("root");
 if (!rootEl) {
-  throw new Error('Root element not found. Make sure index.html contains a div with id="root"');
+  throw new Error(
+    'Root element not found. Make sure index.html contains a div with id="root"'
+  );
 }
 
 createRoot(rootEl).render(
   <React.StrictMode>
     <App />
-  </React.StrictMode>,
+  </React.StrictMode>
 );

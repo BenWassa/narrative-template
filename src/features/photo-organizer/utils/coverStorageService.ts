@@ -4,10 +4,10 @@
  * and reduced memory footprint.
  */
 
-const DB_NAME = 'narrative-covers';
+const DB_NAME = "narrative-covers";
 const DB_VERSION = 1;
-const COVER_STORE = 'covers';
-const METADATA_STORE = 'metadata';
+const COVER_STORE = "covers";
+const METADATA_STORE = "metadata";
 
 interface CoverMetadata {
   projectId: string;
@@ -37,20 +37,20 @@ async function initDB(): Promise<IDBDatabase> {
       resolve(dbInstance);
     };
 
-    request.onupgradeneeded = event => {
+    request.onupgradeneeded = (event) => {
       const db = (event.target as IDBOpenDBRequest).result;
 
       // Create cover blob store
       if (!db.objectStoreNames.contains(COVER_STORE)) {
-        db.createObjectStore(COVER_STORE, { keyPath: 'coverKey' });
+        db.createObjectStore(COVER_STORE, { keyPath: "coverKey" });
       }
 
       // Create metadata store for LRU tracking and project references
       if (!db.objectStoreNames.contains(METADATA_STORE)) {
         const metadataStore = db.createObjectStore(METADATA_STORE, {
-          keyPath: 'projectId',
+          keyPath: "projectId",
         });
-        metadataStore.createIndex('lastUsed', 'lastUsed', { unique: false });
+        metadataStore.createIndex("lastUsed", "lastUsed", { unique: false });
       }
     };
   });
@@ -64,7 +64,7 @@ export async function saveCover(
   projectId: string,
   blob: Blob,
   width: number = 120,
-  height: number = 90,
+  height: number = 90
 ): Promise<string> {
   const db = await initDB();
   const coverKey = `cover-${projectId}-${Date.now()}`;
@@ -72,7 +72,7 @@ export async function saveCover(
 
   // Store the blob
   const storeRequest = db
-    .transaction([COVER_STORE], 'readwrite')
+    .transaction([COVER_STORE], "readwrite")
     .objectStore(COVER_STORE)
     .put({ coverKey, blob });
 
@@ -92,7 +92,7 @@ export async function saveCover(
   };
 
   const metaRequest = db
-    .transaction([METADATA_STORE], 'readwrite')
+    .transaction([METADATA_STORE], "readwrite")
     .objectStore(METADATA_STORE)
     .put(metadata);
 
@@ -113,14 +113,16 @@ export async function getCover(projectId: string): Promise<Blob | null> {
 
   // Get metadata to find the cover key
   const metaRequest = db
-    .transaction([METADATA_STORE], 'readonly')
+    .transaction([METADATA_STORE], "readonly")
     .objectStore(METADATA_STORE)
     .get(projectId);
 
-  const metadata = await new Promise<CoverMetadata | undefined>((resolve, reject) => {
-    metaRequest.onsuccess = () => resolve(metaRequest.result);
-    metaRequest.onerror = () => reject(metaRequest.error);
-  });
+  const metadata = await new Promise<CoverMetadata | undefined>(
+    (resolve, reject) => {
+      metaRequest.onsuccess = () => resolve(metaRequest.result);
+      metaRequest.onerror = () => reject(metaRequest.error);
+    }
+  );
 
   if (!metadata) {
     return null;
@@ -128,7 +130,7 @@ export async function getCover(projectId: string): Promise<Blob | null> {
 
   // Update lastUsed timestamp
   const updateRequest = db
-    .transaction([METADATA_STORE], 'readwrite')
+    .transaction([METADATA_STORE], "readwrite")
     .objectStore(METADATA_STORE)
     .put({ ...metadata, lastUsed: Date.now() });
 
@@ -139,7 +141,7 @@ export async function getCover(projectId: string): Promise<Blob | null> {
 
   // Get the blob
   const coverRequest = db
-    .transaction([COVER_STORE], 'readonly')
+    .transaction([COVER_STORE], "readonly")
     .objectStore(COVER_STORE)
     .get(metadata.coverKey);
 
@@ -171,14 +173,16 @@ export async function deleteCover(projectId: string): Promise<void> {
 
   // Get metadata to find the cover key
   const metaRequest = db
-    .transaction([METADATA_STORE], 'readonly')
+    .transaction([METADATA_STORE], "readonly")
     .objectStore(METADATA_STORE)
     .get(projectId);
 
-  const metadata = await new Promise<CoverMetadata | undefined>((resolve, reject) => {
-    metaRequest.onsuccess = () => resolve(metaRequest.result);
-    metaRequest.onerror = () => reject(metaRequest.error);
-  });
+  const metadata = await new Promise<CoverMetadata | undefined>(
+    (resolve, reject) => {
+      metaRequest.onsuccess = () => resolve(metaRequest.result);
+      metaRequest.onerror = () => reject(metaRequest.error);
+    }
+  );
 
   if (!metadata) {
     return;
@@ -186,7 +190,7 @@ export async function deleteCover(projectId: string): Promise<void> {
 
   // Delete blob
   const deleteRequest = db
-    .transaction([COVER_STORE], 'readwrite')
+    .transaction([COVER_STORE], "readwrite")
     .objectStore(COVER_STORE)
     .delete(metadata.coverKey);
 
@@ -197,7 +201,7 @@ export async function deleteCover(projectId: string): Promise<void> {
 
   // Delete metadata
   const metaDeleteRequest = db
-    .transaction([METADATA_STORE], 'readwrite')
+    .transaction([METADATA_STORE], "readwrite")
     .objectStore(METADATA_STORE)
     .delete(projectId);
 
@@ -214,9 +218,9 @@ export async function getAllCoverMetadata(): Promise<CoverMetadata[]> {
   const db = await initDB();
 
   const index = db
-    .transaction([METADATA_STORE], 'readonly')
+    .transaction([METADATA_STORE], "readonly")
     .objectStore(METADATA_STORE)
-    .index('lastUsed');
+    .index("lastUsed");
 
   const results = await new Promise<CoverMetadata[]>((resolve, reject) => {
     const request = index.getAll();
@@ -231,7 +235,9 @@ export async function getAllCoverMetadata(): Promise<CoverMetadata[]> {
  * Evict least-recently-used covers to stay under max count
  * Returns list of evicted project IDs
  */
-export async function evictOldCovers(maxCovers: number = 10): Promise<string[]> {
+export async function evictOldCovers(
+  maxCovers: number = 10
+): Promise<string[]> {
   const metadata = await getAllCoverMetadata();
   const evicted: string[] = [];
 
@@ -252,7 +258,10 @@ export async function evictOldCovers(maxCovers: number = 10): Promise<string[]> 
 export async function clearAllCovers(): Promise<void> {
   const db = await initDB();
 
-  const clearCover = db.transaction([COVER_STORE], 'readwrite').objectStore(COVER_STORE).clear();
+  const clearCover = db
+    .transaction([COVER_STORE], "readwrite")
+    .objectStore(COVER_STORE)
+    .clear();
 
   await new Promise<void>((resolve, reject) => {
     clearCover.onsuccess = () => resolve();
@@ -260,7 +269,7 @@ export async function clearAllCovers(): Promise<void> {
   });
 
   const clearMeta = db
-    .transaction([METADATA_STORE], 'readwrite')
+    .transaction([METADATA_STORE], "readwrite")
     .objectStore(METADATA_STORE)
     .clear();
 
@@ -282,7 +291,9 @@ export async function getCoverStorageSize(): Promise<number> {
  * Migrate covers from localStorage (base64) to IndexedDB (blobs)
  * Used during app upgrade
  */
-export async function migrateFromLocalStorage(recentProjectsKey: string): Promise<{
+export async function migrateFromLocalStorage(
+  recentProjectsKey: string
+): Promise<{
   migrated: number;
   errors: Array<{ projectId: string; error: string }>;
 }> {
@@ -315,8 +326,8 @@ export async function migrateFromLocalStorage(recentProjectsKey: string): Promis
         migrated++;
 
         // Clear from localStorage
-        const updated = projects.map(p =>
-          p.projectId === project.projectId ? { ...p, coverUrl: undefined } : p,
+        const updated = projects.map((p) =>
+          p.projectId === project.projectId ? { ...p, coverUrl: undefined } : p
         );
         localStorage.setItem(recentProjectsKey, JSON.stringify(updated));
       } catch (err) {
@@ -327,7 +338,7 @@ export async function migrateFromLocalStorage(recentProjectsKey: string): Promis
       }
     }
   } catch (err) {
-    console.error('Failed to migrate covers from localStorage:', err);
+    console.error("Failed to migrate covers from localStorage:", err);
   }
 
   return { migrated, errors };

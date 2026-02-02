@@ -1,4 +1,4 @@
-import { RecentProject } from '../OnboardingModal';
+import { RecentProject } from "../OnboardingModal";
 
 function isSameDay(a: Date, b: Date) {
   return (
@@ -13,7 +13,9 @@ interface ProjectGroup {
   projects: RecentProject[];
 }
 
-export default function groupProjectsByDate(projects: RecentProject[]): ProjectGroup[] {
+export default function groupProjectsByDate(
+  projects: RecentProject[]
+): ProjectGroup[] {
   if (!projects || projects.length === 0) return [];
 
   const now = new Date();
@@ -25,19 +27,22 @@ export default function groupProjectsByDate(projects: RecentProject[]): ProjectG
 
   const buckets: { [key: string]: RecentProject[] } = {};
 
-  projects.forEach(p => {
+  projects.forEach((p) => {
     const opened = new Date(p.lastOpened);
 
-    let key = 'Earlier';
+    let key = "Earlier";
     if (isSameDay(opened, today)) {
-      key = 'Today';
+      key = "Today";
     } else if (isSameDay(opened, yesterday)) {
-      key = 'Yesterday';
+      key = "Yesterday";
     } else if (opened >= weekStart) {
-      key = 'This week';
+      key = "This week";
     } else {
       // format as month/day for clarity, e.g. "Dec 3"
-      key = opened.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+      key = opened.toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+      });
     }
 
     buckets[key] = buckets[key] || [];
@@ -45,21 +50,27 @@ export default function groupProjectsByDate(projects: RecentProject[]): ProjectG
   });
 
   // For deterministic ordering: preferred bucket order
-  const order = ['Today', 'Yesterday', 'This week'];
+  const order = ["Today", "Yesterday", "This week"];
   const groups: ProjectGroup[] = [];
 
-  order.forEach(k => {
+  order.forEach((k) => {
     if (buckets[k]) {
       // newest-first
-      groups.push({ label: k, projects: buckets[k].sort((a, b) => b.lastOpened - a.lastOpened) });
+      groups.push({
+        label: k,
+        projects: buckets[k].sort((a, b) => b.lastOpened - a.lastOpened),
+      });
       delete buckets[k];
     }
   });
 
   // Add the remaining buckets sorted by date label (parseable ones first)
   const remainingKeys = Object.keys(buckets).sort((a, b) => a.localeCompare(b));
-  remainingKeys.forEach(k => {
-    groups.push({ label: k, projects: buckets[k].sort((a, b) => b.lastOpened - a.lastOpened) });
+  remainingKeys.forEach((k) => {
+    groups.push({
+      label: k,
+      projects: buckets[k].sort((a, b) => b.lastOpened - a.lastOpened),
+    });
   });
 
   return groups;

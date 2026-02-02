@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { ChevronDown, Download, Loader } from 'lucide-react';
-import type { RecentProject } from '../OnboardingModal';
+import { useState } from "react";
+import { ChevronDown, Download, Loader } from "lucide-react";
+import type { RecentProject } from "../OnboardingModal";
 
 interface ProjectStats {
   total: number;
@@ -91,9 +91,12 @@ export default function ProjectHeader({
             className="w-8 h-8 rounded"
           />
           <div>
-            <h1 className="text-lg font-semibold text-gray-100">{projectName}</h1>
+            <h1 className="text-lg font-semibold text-gray-100">
+              {projectName}
+            </h1>
             <p className="text-xs text-gray-400">
-              {stats.sorted} sorted · {stats.root} root · {stats.favorites} favorites
+              {stats.sorted} sorted · {stats.root} root · {stats.favorites}{" "}
+              favorites
             </p>
           </div>
         </div>
@@ -117,12 +120,12 @@ export default function ProjectHeader({
               onClick={onStartCoverSelection}
               className={`px-3 py-1 rounded text-sm font-medium ${
                 coverSelectionMode
-                  ? 'bg-yellow-200 text-yellow-900'
-                  : 'bg-gray-800 hover:bg-gray-700 text-gray-100'
+                  ? "bg-yellow-200 text-yellow-900"
+                  : "bg-gray-800 hover:bg-gray-700 text-gray-100"
               }`}
               title="Set cover from selected photo"
             >
-              {coverSelectionMode ? 'Selecting…' : 'Set Cover'}
+              {coverSelectionMode ? "Selecting…" : "Set Cover"}
             </button>
           )}
 
@@ -142,7 +145,7 @@ export default function ProjectHeader({
 
           <div className="relative">
             <button
-              onClick={() => setShowProjectMenu(prev => !prev)}
+              onClick={() => setShowProjectMenu((prev) => !prev)}
               className="px-3 py-1 bg-gray-800 hover:bg-gray-700 rounded text-sm font-medium flex items-center gap-1"
               title="Open recent projects"
               aria-expanded={showProjectMenu}
@@ -156,10 +159,12 @@ export default function ProjectHeader({
                   Recent Projects
                 </div>
                 {recentProjects.length === 0 ? (
-                  <div className="px-3 py-3 text-sm text-gray-400">No recent projects yet.</div>
+                  <div className="px-3 py-3 text-sm text-gray-400">
+                    No recent projects yet.
+                  </div>
                 ) : (
                   <div className="max-h-64 overflow-y-auto">
-                    {recentProjects.map(project => (
+                    {recentProjects.map((project) => (
                       <button
                         key={project.projectId}
                         onClick={() => {
@@ -168,8 +173,12 @@ export default function ProjectHeader({
                         }}
                         className="w-full text-left px-3 py-2 hover:bg-gray-800"
                       >
-                        <div className="text-sm text-gray-100">{project.projectName}</div>
-                        <div className="text-xs text-gray-500 truncate">{project.rootPath}</div>
+                        <div className="text-sm text-gray-100">
+                          {project.projectName}
+                        </div>
+                        <div className="text-xs text-gray-500 truncate">
+                          {project.rootPath}
+                        </div>
                       </button>
                     ))}
                   </div>
@@ -241,19 +250,19 @@ export default function ProjectHeader({
 
       <div className="flex gap-1 px-6 pb-2">
         {[
-          { id: 'folders', label: 'Folders', count: stats.root },
-          { id: 'favorites', label: 'Favorites', count: stats.favorites },
-          { id: 'archive', label: 'Archive', count: stats.archived },
-          { id: 'review', label: 'Review', count: stats.sorted },
-        ].map(view => (
+          { id: "folders", label: "Folders", count: stats.root },
+          { id: "favorites", label: "Favorites", count: stats.favorites },
+          { id: "archive", label: "Archive", count: stats.archived },
+          { id: "review", label: "Review", count: stats.sorted },
+        ].map((view) => (
           <button
             key={view.id}
             onClick={() => {
-              if (currentView === 'folders') {
+              if (currentView === "folders") {
                 onRememberFoldersViewState();
               }
               onChangeView(view.id);
-              if (view.id === 'folders') {
+              if (view.id === "folders") {
                 onRestoreFoldersViewState();
               } else {
                 onClearDaySelection();
@@ -261,12 +270,14 @@ export default function ProjectHeader({
             }}
             className={`px-4 py-2 rounded-t text-sm font-medium transition-colors ${
               currentView === view.id
-                ? 'bg-gray-950 text-blue-400'
-                : 'text-gray-400 hover:text-gray-200'
+                ? "bg-gray-950 text-blue-400"
+                : "text-gray-400 hover:text-gray-200"
             }`}
           >
-            {view.label}{' '}
-            {view.count > 0 && <span className="text-xs opacity-60">({view.count})</span>}
+            {view.label}{" "}
+            {view.count > 0 && (
+              <span className="text-xs opacity-60">({view.count})</span>
+            )}
           </button>
         ))}
       </div>
@@ -281,10 +292,12 @@ export default function ProjectHeader({
         <button
           onClick={onToggleHideAssigned}
           className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-            hideAssigned ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+            hideAssigned
+              ? "bg-blue-600 text-white"
+              : "bg-gray-800 text-gray-300 hover:bg-gray-700"
           }`}
         >
-          {hideAssigned ? 'Show All' : 'Hide Assigned'}
+          {hideAssigned ? "Show All" : "Hide Assigned"}
         </button>
       </div>
 

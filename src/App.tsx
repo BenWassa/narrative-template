@@ -1,5 +1,5 @@
-import React from 'react';
-import PhotoOrganizer from './features/photo-organizer/PhotoOrganizer';
+import React from "react";
+import PhotoOrganizer from "./features/photo-organizer/PhotoOrganizer";
 
 /**
  * Top-level application component

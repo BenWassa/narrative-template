@@ -28,17 +28,17 @@ async function resizeImage(
   width: number,
   height: number,
   quality: number,
-  useWebP = true,
+  useWebP = true
 ): Promise<Blob> {
   // Create an image bitmap from the blob
   const imageBitmap = await createImageBitmap(blob);
 
   // Create an offscreen canvas
   const offscreenCanvas = new OffscreenCanvas(width, height);
-  const ctx = offscreenCanvas.getContext('2d');
+  const ctx = offscreenCanvas.getContext("2d");
 
   if (!ctx) {
-    throw new Error('Failed to get canvas context');
+    throw new Error("Failed to get canvas context");
   }
 
   // Draw the image onto the canvas
@@ -49,16 +49,16 @@ async function resizeImage(
   try {
     if (useWebP) {
       resizedBlob = await offscreenCanvas.convertToBlob({
-        type: 'image/webp',
+        type: "image/webp",
         quality,
       });
     } else {
-      throw new Error('WebP disabled');
+      throw new Error("WebP disabled");
     }
   } catch (e) {
     // Fall back to JPEG
     resizedBlob = await offscreenCanvas.convertToBlob({
-      type: 'image/jpeg',
+      type: "image/jpeg",
       quality,
     });
   }
@@ -76,7 +76,13 @@ self.onmessage = async (event: MessageEvent<ResizeRequest>) => {
   const { id, blob, width, height, quality, useWebP = true } = event.data;
 
   try {
-    const resizedBlob = await resizeImage(blob, width, height, quality, useWebP);
+    const resizedBlob = await resizeImage(
+      blob,
+      width,
+      height,
+      quality,
+      useWebP
+    );
     self.postMessage({ id, blob: resizedBlob } as ResizeResponse);
   } catch (error) {
     self.postMessage({

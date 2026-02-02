@@ -3,10 +3,10 @@
  * Ensures consistent ordering across all views (grid, viewer, strip).
  */
 
-import type { ProjectPhoto } from '../services/projectService';
+import type { ProjectPhoto } from "../services/projectService";
 
 export interface SortOptions {
-  groupBy?: 'subfolder' | 'bucket' | 'day' | null;
+  groupBy?: "subfolder" | "bucket" | "day" | null;
   separateVideos?: boolean;
   selectedDay?: number | null;
   getSubfolderGroup?: (photo: ProjectPhoto, day: number | null) => string;
@@ -37,14 +37,14 @@ function comparePhotos(a: ProjectPhoto, b: ProjectPhoto): number {
     return a.timestamp - b.timestamp;
   }
 
-  const pathA = a.filePath || a.originalName || '';
-  const pathB = b.filePath || b.originalName || '';
+  const pathA = a.filePath || a.originalName || "";
+  const pathB = b.filePath || b.originalName || "";
   const pathCmp = pathA.localeCompare(pathB);
   if (pathCmp !== 0) {
     return pathCmp;
   }
 
-  const nameCmp = (a.originalName || '').localeCompare(b.originalName || '');
+  const nameCmp = (a.originalName || "").localeCompare(b.originalName || "");
   if (nameCmp !== 0) {
     return nameCmp;
   }
@@ -55,27 +55,37 @@ function comparePhotos(a: ProjectPhoto, b: ProjectPhoto): number {
 /**
  * Sort photos with optional grouping.
  */
-export function sortPhotos(photos: ProjectPhoto[], options: SortOptions = {}): OrderingResult {
-  const { groupBy, separateVideos, selectedDay, getSubfolderGroup, isVideo } = options;
+export function sortPhotos(
+  photos: ProjectPhoto[],
+  options: SortOptions = {}
+): OrderingResult {
+  const { groupBy, separateVideos, selectedDay, getSubfolderGroup, isVideo } =
+    options;
 
   // Step 1: Base sort (always apply)
   const sorted = [...photos].sort(comparePhotos);
 
   // Step 2: Apply grouping if requested
-  if (groupBy === 'subfolder' && selectedDay != null && getSubfolderGroup) {
-    return groupBySubfolder(sorted, selectedDay, getSubfolderGroup, separateVideos, isVideo);
+  if (groupBy === "subfolder" && selectedDay != null && getSubfolderGroup) {
+    return groupBySubfolder(
+      sorted,
+      selectedDay,
+      getSubfolderGroup,
+      separateVideos,
+      isVideo
+    );
   }
-  if (groupBy === 'bucket') {
+  if (groupBy === "bucket") {
     return groupByBucket(sorted, separateVideos, isVideo);
   }
-  if (groupBy === 'day') {
+  if (groupBy === "day") {
     return groupByDay(sorted, separateVideos, isVideo);
   }
 
   // Step 3: Separate videos if requested (without grouping)
   if (separateVideos && isVideo) {
-    const stills = sorted.filter(photo => !isVideo(photo));
-    const videos = sorted.filter(photo => isVideo(photo));
+    const stills = sorted.filter((photo) => !isVideo(photo));
+    const videos = sorted.filter((photo) => isVideo(photo));
     return buildIndexMap([...stills, ...videos]);
   }
 
@@ -88,11 +98,11 @@ function groupBySubfolder(
   selectedDay: number,
   getSubfolderGroup: (photo: ProjectPhoto, day: number | null) => string,
   separateVideos?: boolean,
-  isVideo?: (photo: ProjectPhoto) => boolean,
+  isVideo?: (photo: ProjectPhoto) => boolean
 ): OrderingResult {
   const groups = new Map<string, ProjectPhoto[]>();
 
-  sorted.forEach(photo => {
+  sorted.forEach((photo) => {
     const label = getSubfolderGroup(photo, selectedDay);
     if (!groups.has(label)) {
       groups.set(label, []);
@@ -102,8 +112,8 @@ function groupBySubfolder(
 
   const sortedGroups = Array.from(groups.entries())
     .sort(([labelA], [labelB]) => {
-      if (labelA === 'Day Root') return -1;
-      if (labelB === 'Day Root') return 1;
+      if (labelA === "Day Root") return -1;
+      if (labelB === "Day Root") return 1;
       return labelA.localeCompare(labelB);
     })
     .map(([label, photos]) => ({ label, photos }));
@@ -111,12 +121,12 @@ function groupBySubfolder(
   const orderedPhotos: ProjectPhoto[] = [];
   const groupsWithIndices: OrderingGroup[] = [];
 
-  sortedGroups.forEach(group => {
+  sortedGroups.forEach((group) => {
     const startIndex = orderedPhotos.length;
 
     if (separateVideos && isVideo) {
-      const stills = group.photos.filter(photo => !isVideo(photo));
-      const videos = group.photos.filter(photo => isVideo(photo));
+      const stills = group.photos.filter((photo) => !isVideo(photo));
+      const videos = group.photos.filter((photo) => isVideo(photo));
       orderedPhotos.push(...stills, ...videos);
     } else {
       orderedPhotos.push(...group.photos);
@@ -142,12 +152,21 @@ function groupBySubfolder(
 function groupByBucket(
   sorted: ProjectPhoto[],
   separateVideos?: boolean,
-  isVideo?: (photo: ProjectPhoto) => boolean,
+  isVideo?: (photo: ProjectPhoto) => boolean
 ): OrderingResult {
-  const buckets: Array<string | null> = ['A', 'B', 'C', 'D', 'E', 'M', 'X', null];
+  const buckets: Array<string | null> = [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "M",
+    "X",
+    null,
+  ];
   const groups = new Map<string | null, ProjectPhoto[]>();
 
-  sorted.forEach(photo => {
+  sorted.forEach((photo) => {
     const bucket = photo.bucket || null;
     if (!groups.has(bucket)) {
       groups.set(bucket, []);
@@ -156,12 +175,12 @@ function groupByBucket(
   });
 
   const orderedPhotos: ProjectPhoto[] = [];
-  buckets.forEach(bucket => {
+  buckets.forEach((bucket) => {
     if (!groups.has(bucket)) return;
     const groupPhotos = groups.get(bucket)!;
     if (separateVideos && isVideo) {
-      const stills = groupPhotos.filter(photo => !isVideo(photo));
-      const videos = groupPhotos.filter(photo => isVideo(photo));
+      const stills = groupPhotos.filter((photo) => !isVideo(photo));
+      const videos = groupPhotos.filter((photo) => isVideo(photo));
       orderedPhotos.push(...stills, ...videos);
     } else {
       orderedPhotos.push(...groupPhotos);
@@ -174,11 +193,11 @@ function groupByBucket(
 function groupByDay(
   sorted: ProjectPhoto[],
   separateVideos?: boolean,
-  isVideo?: (photo: ProjectPhoto) => boolean,
+  isVideo?: (photo: ProjectPhoto) => boolean
 ): OrderingResult {
   const days = new Map<number | null, ProjectPhoto[]>();
 
-  sorted.forEach(photo => {
+  sorted.forEach((photo) => {
     const day = photo.day ?? null;
     if (!days.has(day)) {
       days.set(day, []);
@@ -193,11 +212,11 @@ function groupByDay(
   });
 
   const orderedPhotos: ProjectPhoto[] = [];
-  sortedDays.forEach(day => {
+  sortedDays.forEach((day) => {
     const groupPhotos = days.get(day)!;
     if (separateVideos && isVideo) {
-      const stills = groupPhotos.filter(photo => !isVideo(photo));
-      const videos = groupPhotos.filter(photo => isVideo(photo));
+      const stills = groupPhotos.filter((photo) => !isVideo(photo));
+      const videos = groupPhotos.filter((photo) => isVideo(photo));
       orderedPhotos.push(...stills, ...videos);
     } else {
       orderedPhotos.push(...groupPhotos);
@@ -216,7 +235,10 @@ function buildIndexMap(photos: ProjectPhoto[]): OrderingResult {
 /**
  * Fast lookup: given a photo ID, get its index in the ordered array.
  */
-export function getPhotoIndex(photoId: string, indexMap: Map<string, number>): number {
+export function getPhotoIndex(
+  photoId: string,
+  indexMap: Map<string, number>
+): number {
   return indexMap.get(photoId) ?? -1;
 }
 
@@ -225,14 +247,14 @@ export function getPhotoIndex(photoId: string, indexMap: Map<string, number>): n
  */
 export function navigatePhotos(
   currentPhotoId: string,
-  direction: 'next' | 'prev',
+  direction: "next" | "prev",
   result: OrderingResult,
-  filter?: (photo: ProjectPhoto) => boolean,
+  filter?: (photo: ProjectPhoto) => boolean
 ): ProjectPhoto | null {
   const currentIndex = getPhotoIndex(currentPhotoId, result.indexMap);
   if (currentIndex === -1) return null;
 
-  const step = direction === 'next' ? 1 : -1;
+  const step = direction === "next" ? 1 : -1;
   let nextIndex = currentIndex + step;
 
   if (filter) {

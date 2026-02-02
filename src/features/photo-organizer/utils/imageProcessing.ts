@@ -16,9 +16,12 @@ const pendingRequests = new Map<
 function initializeWorker(): Worker {
   if (!worker) {
     try {
-      worker = new Worker(new URL('../workers/imageResizer.worker.ts', import.meta.url), {
-        type: 'module',
-      });
+      worker = new Worker(
+        new URL("../workers/imageResizer.worker.ts", import.meta.url),
+        {
+          type: "module",
+        }
+      );
 
       worker.onmessage = (event: MessageEvent) => {
         const { id, blob, error } = event.data;
@@ -34,12 +37,15 @@ function initializeWorker(): Worker {
         }
       };
 
-      worker.onerror = error => {
-        console.error('Image resizer worker error:', error);
+      worker.onerror = (error) => {
+        console.error("Image resizer worker error:", error);
         worker = null; // Mark worker as failed, will fall back to main thread
       };
     } catch (err) {
-      console.warn('Failed to create image resizer worker, falling back to main thread:', err);
+      console.warn(
+        "Failed to create image resizer worker, falling back to main thread:",
+        err
+      );
       worker = null;
     }
   }
@@ -55,10 +61,10 @@ export async function resizeImageBlob(
   width: number,
   height: number,
   quality: number,
-  useWebP = true,
+  useWebP = true
 ): Promise<Blob> {
   // Try worker first
-  if (typeof Worker !== 'undefined') {
+  if (typeof Worker !== "undefined") {
     try {
       const w = initializeWorker();
       if (w) {
@@ -70,17 +76,17 @@ export async function resizeImageBlob(
           // Timeout after 10 seconds
           const timeout = setTimeout(() => {
             pendingRequests.delete(id);
-            reject(new Error('Image resizing timed out'));
+            reject(new Error("Image resizing timed out"));
           }, 10000);
 
           w.postMessage(
             { id, blob, width, height, quality, useWebP },
-            undefined, // transfer list will be added if needed
+            undefined // transfer list will be added if needed
           );
         });
       }
     } catch (err) {
-      console.warn('Failed to use worker for image resizing:', err);
+      console.warn("Failed to use worker for image resizing:", err);
       // Fall through to main thread
     }
   }
@@ -97,17 +103,17 @@ async function resizeImageOnMainThread(
   width: number,
   height: number,
   quality: number,
-  useWebP = true,
+  useWebP = true
 ): Promise<Blob> {
   // Try OffscreenCanvas first (more efficient)
-  if (typeof OffscreenCanvas !== 'undefined') {
+  if (typeof OffscreenCanvas !== "undefined") {
     try {
       const imageBitmap = await createImageBitmap(blob);
       const offscreenCanvas = new OffscreenCanvas(width, height);
-      const ctx = offscreenCanvas.getContext('2d');
+      const ctx = offscreenCanvas.getContext("2d");
 
       if (!ctx) {
-        throw new Error('Failed to get canvas context');
+        throw new Error("Failed to get canvas context");
       }
 
       ctx.drawImage(imageBitmap, 0, 0, width, height);
@@ -117,21 +123,24 @@ async function resizeImageOnMainThread(
       try {
         if (useWebP) {
           return await offscreenCanvas.convertToBlob({
-            type: 'image/webp',
+            type: "image/webp",
             quality,
           });
         } else {
-          throw new Error('WebP disabled');
+          throw new Error("WebP disabled");
         }
       } catch (e) {
         // Fall back to JPEG
         return await offscreenCanvas.convertToBlob({
-          type: 'image/jpeg',
+          type: "image/jpeg",
           quality,
         });
       }
     } catch (err) {
-      console.warn('OffscreenCanvas failed, falling back to regular canvas:', err);
+      console.warn(
+        "OffscreenCanvas failed, falling back to regular canvas:",
+        err
+      );
       // Fall through to regular canvas
     }
   }
@@ -140,44 +149,44 @@ async function resizeImageOnMainThread(
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
-    reader.onload = event => {
+    reader.onload = (event) => {
       const img = new Image();
 
       img.onload = () => {
-        const canvas = document.createElement('canvas');
+        const canvas = document.createElement("canvas");
         canvas.width = width;
         canvas.height = height;
 
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext("2d");
         if (!ctx) {
-          reject(new Error('Failed to get canvas context'));
+          reject(new Error("Failed to get canvas context"));
           return;
         }
 
         ctx.drawImage(img, 0, 0, width, height);
 
         canvas.toBlob(
-          resizedBlob => {
+          (resizedBlob) => {
             if (resizedBlob) {
               resolve(resizedBlob);
             } else {
-              reject(new Error('Failed to create blob from canvas'));
+              reject(new Error("Failed to create blob from canvas"));
             }
           },
-          'image/jpeg',
-          quality,
+          "image/jpeg",
+          quality
         );
       };
 
       img.onerror = () => {
-        reject(new Error('Failed to load image'));
+        reject(new Error("Failed to load image"));
       };
 
       img.src = event.target?.result as string;
     };
 
     reader.onerror = () => {
-      reject(new Error('Failed to read blob'));
+      reject(new Error("Failed to read blob"));
     };
 
     reader.readAsDataURL(blob);

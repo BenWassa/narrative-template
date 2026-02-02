@@ -1,26 +1,26 @@
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from "react";
 
 import type {
   ProjectPhoto,
   ProjectSettings,
   ProjectState,
   ExportManifest,
-} from '../services/projectService';
+} from "../services/projectService";
 import {
   resolveSourceRoot,
   resolveDestinationRoot,
   resolveMeceBucketPath,
-} from '../utils/pathResolver';
-import { BUCKET_LABELS } from '../constants/meceBuckets';
+} from "../utils/pathResolver";
+import { BUCKET_LABELS } from "../constants/meceBuckets";
 import {
   generateExportManifest,
   generateUndoScript,
   saveExportManifest,
   loadExportManifest,
   clearExportManifest,
-} from '../utils/exportManifest';
+} from "../utils/exportManifest";
 
-export type ExportCopyStatus = 'idle' | 'copied' | 'failed';
+export type ExportCopyStatus = "idle" | "copied" | "failed";
 
 interface UseExportScriptOptions {
   photos: ProjectPhoto[];
@@ -38,15 +38,17 @@ export function useExportScript(
   projectSettings: ProjectSettings,
   projectRootPath?: string,
   ingested?: boolean,
-  sourceRoot?: string,
+  sourceRoot?: string
 ) {
   const [showExportScript, setShowExportScript] = useState(false);
-  const [exportScriptText, setExportScriptText] = useState('');
-  const [exportCopyStatus, setExportCopyStatus] = useState<ExportCopyStatus>('idle');
-  const [customProjectPath, setCustomProjectPath] = useState<string>('');
-  const [lastExportManifest, setLastExportManifest] = useState<ExportManifest | null>(null);
+  const [exportScriptText, setExportScriptText] = useState("");
+  const [exportCopyStatus, setExportCopyStatus] =
+    useState<ExportCopyStatus>("idle");
+  const [customProjectPath, setCustomProjectPath] = useState<string>("");
+  const [lastExportManifest, setLastExportManifest] =
+    useState<ExportManifest | null>(null);
   const [showUndoScript, setShowUndoScript] = useState(false);
-  const [undoScriptText, setUndoScriptText] = useState('');
+  const [undoScriptText, setUndoScriptText] = useState("");
 
   // Initialize manifest from localStorage on mount
   useEffect(() => {
@@ -65,7 +67,7 @@ export function useExportScript(
 
       // Build a minimal ProjectState for path resolution
       const projectState: Partial<ProjectState> = {
-        rootPath: projectRootPath || '',
+        rootPath: projectRootPath || "",
         settings: projectSettings,
         dayLabels: dayLabels,
         ingested: ingested,
@@ -73,11 +75,15 @@ export function useExportScript(
       };
 
       // Resolve source and destination using path resolver
-      const computedSourceRoot = resolveSourceRoot(projectState as ProjectState, photos);
+      const computedSourceRoot = resolveSourceRoot(
+        projectState as ProjectState,
+        photos
+      );
       const isIngested = ingested !== false; // Default to true for backward compatibility
 
       // Use override or custom path if provided
-      let detectedProjectRoot = overrideProjectPath || customProjectPath || computedSourceRoot;
+      let detectedProjectRoot =
+        overrideProjectPath || customProjectPath || computedSourceRoot;
 
       // Bucket name mapping for folder naming (from centralized definitions)
       const bucketNames: Record<string, string> = BUCKET_LABELS;
@@ -88,7 +94,7 @@ export function useExportScript(
       const archivePhotos: ProjectPhoto[] = [];
       const rootPhotos: ProjectPhoto[] = [];
 
-      photos.forEach(p => {
+      photos.forEach((p) => {
         // Determine if this photo has been modified/needs to be moved
         const hasBeenRenamed = p.originalName !== p.currentName;
         const hasUserAssignedBucket = p.bucket && !p.isPreOrganized;
@@ -98,13 +104,16 @@ export function useExportScript(
         // Calculate target path for organized photos
         let needsToMove = false;
         if (p.bucket && p.day !== null) {
-          const dayLabel = dayLabels[p.day] || `Day ${String(p.day).padStart(2, '0')}`;
+          const dayLabel =
+            dayLabels[p.day] || `Day ${String(p.day).padStart(2, "0")}`;
           const bucketLabel = bucketNames[p.bucket] || p.bucket;
           const targetPath = `${daysFolder}/${dayLabel}/${p.bucket}_${bucketLabel}/${p.currentName}`;
-          needsToMove = p.filePath !== targetPath && !p.filePath?.includes(targetPath);
+          needsToMove =
+            p.filePath !== targetPath && !p.filePath?.includes(targetPath);
         } else if (p.archived) {
           const targetPath = `${archiveFolder}/${p.currentName}`;
-          needsToMove = p.filePath !== targetPath && !p.filePath?.includes(targetPath);
+          needsToMove =
+            p.filePath !== targetPath && !p.filePath?.includes(targetPath);
         }
 
         // Only include photos that have been modified or need to move
@@ -136,50 +145,56 @@ export function useExportScript(
       });
 
       // Header: show a preview and require confirmation before executing
-      lines.push('#!/bin/bash');
-      lines.push('# Narrative Export Script - Ingest-Aware Export');
-      lines.push('# This script organizes your photos based on ingest state');
-      lines.push('set -e');
-      lines.push('');
+      lines.push("#!/bin/bash");
+      lines.push("# Narrative Export Script - Ingest-Aware Export");
+      lines.push("# This script organizes your photos based on ingest state");
+      lines.push("set -e");
+      lines.push("");
       lines.push(
         `# Ingest mode: ${
-          isIngested ? 'INGESTED (photos in project)' : 'NOT INGESTED (organize in-place)'
-        }`,
+          isIngested
+            ? "INGESTED (photos in project)"
+            : "NOT INGESTED (organize in-place)"
+        }`
       );
-      lines.push('');
+      lines.push("");
       lines.push(
-        `# Export script with dry-run first, then safe execution with preview and confirmation.`,
+        `# Export script with dry-run first, then safe execution with preview and confirmation.`
       );
       lines.push(
-        `# NOTE: Only modified/newly organized photos are included - existing organized files are left untouched.`,
+        `# NOTE: Only modified/newly organized photos are included - existing organized files are left untouched.`
       );
-      lines.push('');
+      lines.push("");
 
       // Prompt for project path first if not provided
       if (detectedProjectRoot) {
         lines.push(`# Where should organized photos be saved?`);
-        lines.push(`read -r -p "Destination folder [${detectedProjectRoot}]: " USER_PROJECT_ROOT`);
-        lines.push(`PROJECT_ROOT="\${USER_PROJECT_ROOT:-${detectedProjectRoot}}"`);
+        lines.push(
+          `read -r -p "Destination folder [${detectedProjectRoot}]: " USER_PROJECT_ROOT`
+        );
+        lines.push(
+          `PROJECT_ROOT="\${USER_PROJECT_ROOT:-${detectedProjectRoot}}"`
+        );
       } else {
         lines.push(`# Where should organized photos be saved?`);
         lines.push(`read -r -p "Destination folder: " PROJECT_ROOT`);
         lines.push('if [ -z "$PROJECT_ROOT" ]; then');
         lines.push('  echo "Error: Destination folder is required"');
-        lines.push('  exit 1');
-        lines.push('fi');
+        lines.push("  exit 1");
+        lines.push("fi");
       }
-      lines.push('');
+      lines.push("");
 
       // Strip quotes if user included them
-      lines.push('# Remove quotes if present');
+      lines.push("# Remove quotes if present");
       lines.push('PROJECT_ROOT="${PROJECT_ROOT//\\\'/}"');
       lines.push('PROJECT_ROOT="${PROJECT_ROOT//\\"/}"');
-      lines.push('');
+      lines.push("");
 
       // Create destination if it doesn't exist
-      lines.push('# Create destination folder if needed');
+      lines.push("# Create destination folder if needed");
       lines.push('mkdir -p "$PROJECT_ROOT"');
-      lines.push('');
+      lines.push("");
       lines.push(`DAYS_FOLDER="${daysFolder}"`);
       lines.push(`ARCHIVE_FOLDER="${archiveFolder}"`);
 
@@ -189,13 +204,15 @@ export function useExportScript(
         lines.push('TARGET_DAYS_DIR="${PROJECT_ROOT}/${DAYS_FOLDER}"');
         lines.push('TARGET_ARCHIVE_DIR="${PROJECT_ROOT}/${ARCHIVE_FOLDER}"');
       } else {
-        lines.push('# Non-ingested mode: MECE folders created in source location');
+        lines.push(
+          "# Non-ingested mode: MECE folders created in source location"
+        );
         lines.push('TARGET_DAYS_DIR="${PROJECT_ROOT}"');
         lines.push('TARGET_ARCHIVE_DIR="${PROJECT_ROOT}/${ARCHIVE_FOLDER}"');
       }
 
-      lines.push('');
-      lines.push('# Color codes for output');
+      lines.push("");
+      lines.push("# Color codes for output");
       lines.push("RED='\\033[0;31m'");
       lines.push("GREEN='\\033[0;32m'");
       lines.push("YELLOW='\\033[1;33m'");
@@ -203,38 +220,48 @@ export function useExportScript(
       lines.push("CYAN='\\033[0;36m'");
       lines.push("BOLD='\\033[1m'");
       lines.push("NC='\\033[0m' # No Color");
-      lines.push('');
-      lines.push('# Print section header');
-      lines.push('print_section() {');
+      lines.push("");
+      lines.push("# Print section header");
+      lines.push("print_section() {");
       lines.push('  local title="$1"');
       lines.push(
-        '  local line="${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"',
+        '  local line="${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"'
       );
-      lines.push('  echo -e ""; echo -e "$line"; echo -e "$title"; echo -e "$line"');
-      lines.push('}');
-      lines.push('');
+      lines.push(
+        '  echo -e ""; echo -e "$line"; echo -e "$title"; echo -e "$line"'
+      );
+      lines.push("}");
+      lines.push("");
       lines.push('print_section "${CYAN}${BOLD}📋 EXPORT PREVIEW${NC}"');
-      lines.push('');
+      lines.push("");
       lines.push('echo -e "${YELLOW}Project root:${NC}"');
       lines.push('echo -e "  ${CYAN}${PROJECT_ROOT}${NC}"');
       lines.push('echo ""');
       lines.push('echo -e "${YELLOW}Destination folders:${NC}"');
       lines.push('echo -e "  Days folder:  ${CYAN}${TARGET_DAYS_DIR}${NC}"');
       if (archivePhotos.length > 0) {
-        lines.push('echo -e "  Archive:      ${CYAN}${TARGET_ARCHIVE_DIR}${NC}"');
+        lines.push(
+          'echo -e "  Archive:      ${CYAN}${TARGET_ARCHIVE_DIR}${NC}"'
+        );
       }
       lines.push('echo ""');
       lines.push(
-        'echo -e "${GREEN}${BOLD}ℹ️  This is a DRY RUN${NC} - no files will be copied yet."',
+        'echo -e "${GREEN}${BOLD}ℹ️  This is a DRY RUN${NC} - no files will be copied yet."'
       );
-      lines.push('echo -e "${GREEN}You will be asked to confirm before any files are moved.${NC}"');
-      lines.push('');
+      lines.push(
+        'echo -e "${GREEN}You will be asked to confirm before any files are moved.${NC}"'
+      );
+      lines.push("");
 
       // Preview: root files
       if (rootPhotos.length > 0) {
-        lines.push('echo -e "${YELLOW}${BOLD}📁 Root Files${NC} (' + rootPhotos.length + ')"');
+        lines.push(
+          'echo -e "${YELLOW}${BOLD}📁 Root Files${NC} (' +
+            rootPhotos.length +
+            ')"'
+        );
         lines.push('echo ""');
-        rootPhotos.forEach(p => {
+        rootPhotos.forEach((p) => {
           if (p.filePath) {
             lines.push('echo -e "  ${CYAN}→${NC} ' + p.currentName + '"');
           }
@@ -244,8 +271,8 @@ export function useExportScript(
 
       // Count total files for summary
       let totalFiles = rootPhotos.length + archivePhotos.length;
-      Object.keys(photosByDay).forEach(day => {
-        Object.keys(photosByDay[parseInt(day)]).forEach(bucket => {
+      Object.keys(photosByDay).forEach((day) => {
+        Object.keys(photosByDay[parseInt(day)]).forEach((bucket) => {
           totalFiles += photosByDay[parseInt(day)][bucket].length;
         });
       });
@@ -256,12 +283,12 @@ export function useExportScript(
       Object.keys(photosByDay)
         .map(Number)
         .sort((a, b) => a - b)
-        .forEach(day => {
-          const label = dayLabels[day] || `Day ${String(day).padStart(2, '0')}`;
+        .forEach((day) => {
+          const label = dayLabels[day] || `Day ${String(day).padStart(2, "0")}`;
           const buckets = photosByDay[day];
           const dayPhotosCount = Object.values(buckets).reduce(
             (sum, bucket) => sum + bucket.length,
-            0,
+            0
           );
 
           // Show day folder
@@ -269,29 +296,36 @@ export function useExportScript(
             lines.push(
               'echo -e "  ${CYAN}' +
                 daysFolder +
-                '/' +
+                "/" +
                 label +
-                '${NC} — ${BOLD}' +
+                "${NC} — ${BOLD}" +
                 dayPhotosCount +
-                '${NC} photos"',
+                '${NC} photos"'
             );
           } else {
             lines.push(
-              'echo -e "  ${CYAN}' + label + '${NC} — ${BOLD}' + dayPhotosCount + '${NC} photos"',
+              'echo -e "  ${CYAN}' +
+                label +
+                "${NC} — ${BOLD}" +
+                dayPhotosCount +
+                '${NC} photos"'
             );
           }
 
           // Group buckets by subfolder if present
-          const photosBySubfolder: Record<string, Record<string, ProjectPhoto[]>> = {};
+          const photosBySubfolder: Record<
+            string,
+            Record<string, ProjectPhoto[]>
+          > = {};
           Object.entries(buckets).forEach(([bucket, photos]) => {
-            photos.forEach(p => {
+            photos.forEach((p) => {
               // Extract subfolder from filePath
               // filePath format: 01_DAYS/Day 02/[subfolder]/A_Establishing/filename.jpg
-              let subfolder = 'root';
+              let subfolder = "root";
               if (p.filePath) {
                 const pathParts = p.filePath.split(/[\\/]/).filter(Boolean);
                 // Find the index of the day label in the path
-                const dayIdx = pathParts.findIndex(part => part === label);
+                const dayIdx = pathParts.findIndex((part) => part === label);
                 // If there's a folder between the day and bucket, it's a subfolder
                 if (dayIdx !== -1 && dayIdx < pathParts.length - 1) {
                   const nextPart = pathParts[dayIdx + 1];
@@ -314,12 +348,19 @@ export function useExportScript(
           // Display subfolders and their buckets
           const subfolderEntries = Object.keys(photosBySubfolder).sort();
           subfolderEntries.forEach((subfolder, subfolderIdx) => {
-            const isLastSubfolder = subfolderIdx === subfolderEntries.length - 1;
-            const subfolderPrefix = isLastSubfolder ? '    └─' : '    ├─';
+            const isLastSubfolder =
+              subfolderIdx === subfolderEntries.length - 1;
+            const subfolderPrefix = isLastSubfolder ? "    └─" : "    ├─";
 
             // Only show subfolder name if it's not root
-            if (subfolder !== 'root') {
-              lines.push('echo -e "  ' + subfolderPrefix + ' ${CYAN}' + subfolder + '${NC}"');
+            if (subfolder !== "root") {
+              lines.push(
+                'echo -e "  ' +
+                  subfolderPrefix +
+                  " ${CYAN}" +
+                  subfolder +
+                  '${NC}"'
+              );
             }
 
             const subfolderBuckets = photosBySubfolder[subfolder];
@@ -331,22 +372,22 @@ export function useExportScript(
 
               // Adjust prefix based on subfolder level
               let bucketPrefix: string;
-              if (subfolder !== 'root') {
-                bucketPrefix = isLastBucket ? '      └─' : '      ├─';
+              if (subfolder !== "root") {
+                bucketPrefix = isLastBucket ? "      └─" : "      ├─";
               } else {
-                bucketPrefix = isLastBucket ? '    └─' : '    ├─';
+                bucketPrefix = isLastBucket ? "    └─" : "    ├─";
               }
 
-              const bucketFolderName = bucket + '_' + bucketLabel;
+              const bucketFolderName = bucket + "_" + bucketLabel;
 
               lines.push(
                 'echo -e "  ' +
                   bucketPrefix +
-                  ' ${CYAN}' +
+                  " ${CYAN}" +
                   bucketFolderName +
-                  '${NC} (${BOLD}' +
+                  "${NC} (${BOLD}" +
                   bucketPhotos.length +
-                  '${NC})"',
+                  '${NC})"'
               );
             });
           });
@@ -355,38 +396,50 @@ export function useExportScript(
 
       // Preview: archive
       if (archivePhotos.length > 0) {
-        lines.push('echo -e "${YELLOW}${BOLD}🗑️  Archive${NC} (' + archivePhotos.length + ')"');
+        lines.push(
+          'echo -e "${YELLOW}${BOLD}🗑️  Archive${NC} (' +
+            archivePhotos.length +
+            ')"'
+        );
         lines.push('echo ""');
       }
 
-      lines.push('');
+      lines.push("");
       lines.push('echo -e "${YELLOW}${BOLD}📊 Summary${NC}"');
-      lines.push('echo -e "  Total files to copy: ${CYAN}${BOLD}' + totalFiles + '${NC}"');
-      lines.push('echo ""');
-      lines.push('echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"');
-      lines.push('echo ""');
       lines.push(
-        'echo -e "${RED}${BOLD}⚠️  WARNING:${NC} This will copy files to your project directory."',
+        'echo -e "  Total files to copy: ${CYAN}${BOLD}' + totalFiles + '${NC}"'
       );
       lines.push('echo ""');
       lines.push(
-        'echo -e "${YELLOW}${BOLD}Type ${NC}\\"${GREEN}yes${NC}\\"${YELLOW} to confirm (or press Ctrl+C to abort)${NC}"',
+        'echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"'
+      );
+      lines.push('echo ""');
+      lines.push(
+        'echo -e "${RED}${BOLD}⚠️  WARNING:${NC} This will copy files to your project directory."'
+      );
+      lines.push('echo ""');
+      lines.push(
+        'echo -e "${YELLOW}${BOLD}Type ${NC}\\"${GREEN}yes${NC}\\"${YELLOW} to confirm (or press Ctrl+C to abort)${NC}"'
       );
       lines.push('read -r -p "Confirm: " confirm');
       lines.push('if [ "$confirm" != "yes" ]; then');
       lines.push('  echo ""');
       lines.push('  echo -e "${YELLOW}✗ Aborted${NC} - no files were copied."');
       lines.push('  echo ""');
-      lines.push('  exit 0');
-      lines.push('fi');
-      lines.push('');
-      lines.push('echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"');
+      lines.push("  exit 0");
+      lines.push("fi");
+      lines.push("");
+      lines.push(
+        'echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"'
+      );
       lines.push('echo -e "${GREEN}${BOLD}✓ Copying files...${NC}"');
-      lines.push('echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"');
+      lines.push(
+        'echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"'
+      );
       lines.push('echo ""');
 
       if (rootPhotos.length > 0) {
-        rootPhotos.forEach(p => {
+        rootPhotos.forEach((p) => {
           if (p.filePath) {
             lines.push(
               'if [ -e "${PROJECT_ROOT}/' +
@@ -397,36 +450,41 @@ export function useExportScript(
                 p.filePath +
                 '" "${PROJECT_ROOT}/' +
                 p.currentName +
-                '"; fi',
+                '"; fi'
             );
           }
         });
-        lines.push('');
+        lines.push("");
       }
 
       // Execution: create day folders with bucket subfolders and copy files
       if (isIngested) {
-        lines.push('# Ingested mode: create day folders with MECE buckets inside');
+        lines.push(
+          "# Ingested mode: create day folders with MECE buckets inside"
+        );
         lines.push('mkdir -p "${TARGET_DAYS_DIR}"');
       }
 
       Object.keys(photosByDay)
         .map(Number)
         .sort((a, b) => a - b)
-        .forEach(day => {
-          const label = dayLabels[day] || `Day ${String(day).padStart(2, '0')}`;
+        .forEach((day) => {
+          const label = dayLabels[day] || `Day ${String(day).padStart(2, "0")}`;
           const buckets = photosByDay[day];
 
           // For non-ingested mode, group by subfolder first
           if (!isIngested) {
-            const photosBySubfolder: Record<string, Record<string, ProjectPhoto[]>> = {};
+            const photosBySubfolder: Record<
+              string,
+              Record<string, ProjectPhoto[]>
+            > = {};
             Object.entries(buckets).forEach(([bucket, photos]) => {
-              photos.forEach(p => {
+              photos.forEach((p) => {
                 // Extract subfolder from filePath
-                let subfolder = '';
+                let subfolder = "";
                 if (p.filePath) {
                   const pathParts = p.filePath.split(/[\\/]/).filter(Boolean);
-                  const dayIdx = pathParts.findIndex(part => part === label);
+                  const dayIdx = pathParts.findIndex((part) => part === label);
                   if (dayIdx !== -1 && dayIdx < pathParts.length - 1) {
                     const nextPart = pathParts[dayIdx + 1];
                     if (nextPart && !nextPart.match(/^[A-E]_|^M_/)) {
@@ -445,61 +503,63 @@ export function useExportScript(
             });
 
             // Create buckets within each subfolder
-            Object.entries(photosBySubfolder).forEach(([subfolder, subfolderBuckets]) => {
-              Object.entries(subfolderBuckets).forEach(([bucket, photos]) => {
-                const bucketLabel = bucketNames[bucket] || bucket;
-                let bucketFolder: string;
-                if (subfolder) {
-                  bucketFolder = `${label}/${subfolder}/${bucket}_${bucketLabel}`;
-                } else {
-                  bucketFolder = `${label}/${bucket}_${bucketLabel}`;
-                }
-
-                // Create folder and copy files
-                lines.push('mkdir -p "${PROJECT_ROOT}/' + bucketFolder + '"');
-                photos.forEach(p => {
-                  if (p.filePath) {
-                    lines.push(
-                      'if [ -e "${PROJECT_ROOT}/' +
-                        bucketFolder +
-                        '/' +
-                        p.currentName +
-                        '" ]; then echo "Skipping existing: ' +
-                        bucketFolder +
-                        '/' +
-                        p.currentName +
-                        '"; else cp "${PROJECT_ROOT}/' +
-                        p.filePath +
-                        '" "${PROJECT_ROOT}/' +
-                        bucketFolder +
-                        '/' +
-                        p.currentName +
-                        '"; fi',
-                    );
+            Object.entries(photosBySubfolder).forEach(
+              ([subfolder, subfolderBuckets]) => {
+                Object.entries(subfolderBuckets).forEach(([bucket, photos]) => {
+                  const bucketLabel = bucketNames[bucket] || bucket;
+                  let bucketFolder: string;
+                  if (subfolder) {
+                    bucketFolder = `${label}/${subfolder}/${bucket}_${bucketLabel}`;
+                  } else {
+                    bucketFolder = `${label}/${bucket}_${bucketLabel}`;
                   }
+
+                  // Create folder and copy files
+                  lines.push('mkdir -p "${PROJECT_ROOT}/' + bucketFolder + '"');
+                  photos.forEach((p) => {
+                    if (p.filePath) {
+                      lines.push(
+                        'if [ -e "${PROJECT_ROOT}/' +
+                          bucketFolder +
+                          "/" +
+                          p.currentName +
+                          '" ]; then echo "Skipping existing: ' +
+                          bucketFolder +
+                          "/" +
+                          p.currentName +
+                          '"; else cp "${PROJECT_ROOT}/' +
+                          p.filePath +
+                          '" "${PROJECT_ROOT}/' +
+                          bucketFolder +
+                          "/" +
+                          p.currentName +
+                          '"; fi'
+                      );
+                    }
+                  });
                 });
-              });
-            });
+              }
+            );
           } else {
             // Ingested mode: original logic
             Object.keys(buckets)
               .sort()
-              .forEach(bucket => {
+              .forEach((bucket) => {
                 const bucketLabel = bucketNames[bucket] || bucket;
                 const bucketFolder = `${daysFolder}/${label}/${bucket}_${bucketLabel}`;
                 const photos = buckets[bucket];
 
                 lines.push('mkdir -p "${PROJECT_ROOT}/' + bucketFolder + '"');
-                photos.forEach(p => {
+                photos.forEach((p) => {
                   if (p.filePath) {
                     lines.push(
                       'if [ -e "${PROJECT_ROOT}/' +
                         bucketFolder +
-                        '/' +
+                        "/" +
                         p.currentName +
                         '" ]; then echo "Skipping existing: ' +
                         bucketFolder +
-                        '/' +
+                        "/" +
                         p.currentName +
                         '"; else mkdir -p "${PROJECT_ROOT}/' +
                         bucketFolder +
@@ -507,9 +567,9 @@ export function useExportScript(
                         p.filePath +
                         '" "${PROJECT_ROOT}/' +
                         bucketFolder +
-                        '/' +
+                        "/" +
                         p.currentName +
-                        '"; fi',
+                        '"; fi'
                     );
                   }
                 });
@@ -520,7 +580,7 @@ export function useExportScript(
       // Execution: archive
       if (archivePhotos.length > 0) {
         lines.push('mkdir -p "${TARGET_ARCHIVE_DIR}"');
-        archivePhotos.forEach(p => {
+        archivePhotos.forEach((p) => {
           if (p.filePath) {
             lines.push(
               'if [ -e "${TARGET_ARCHIVE_DIR}/' +
@@ -533,28 +593,40 @@ export function useExportScript(
                 p.currentName +
                 '" && echo "Copied: ' +
                 p.currentName +
-                '"; fi',
+                '"; fi'
             );
           }
         });
       }
 
-      lines.push('');
+      lines.push("");
       lines.push('echo ""');
-      lines.push('echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"');
+      lines.push(
+        'echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"'
+      );
       lines.push('echo -e "${GREEN}${BOLD}✨ Copy operation complete!${NC}"');
-      lines.push('echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"');
+      lines.push(
+        'echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"'
+      );
       lines.push('echo ""');
 
-      return lines.join('\n');
+      return lines.join("\n");
     },
-    [photos, dayLabels, projectSettings, projectRootPath, customProjectPath, ingested, sourceRoot],
+    [
+      photos,
+      dayLabels,
+      projectSettings,
+      projectRootPath,
+      customProjectPath,
+      ingested,
+      sourceRoot,
+    ]
   );
 
   const openExportScriptModal = useCallback(() => {
     const scriptText = buildExportScript();
     setExportScriptText(scriptText);
-    setExportCopyStatus('idle');
+    setExportCopyStatus("idle");
     setShowExportScript(true);
   }, [buildExportScript]);
 
@@ -566,13 +638,13 @@ export function useExportScript(
     const scriptText = exportScriptText || buildExportScript();
 
     // Create a blob with the script content
-    const blob = new Blob([scriptText], { type: 'text/plain' });
+    const blob = new Blob([scriptText], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
 
     // Create a temporary link and trigger download
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    link.download = 'narrative-export.sh';
+    link.download = "narrative-export.sh";
     document.body.appendChild(link);
     link.click();
 
@@ -588,17 +660,17 @@ export function useExportScript(
     }
     try {
       if (!navigator?.clipboard?.writeText) {
-        throw new Error('Clipboard API unavailable');
+        throw new Error("Clipboard API unavailable");
       }
       await navigator.clipboard.writeText(scriptText);
-      setExportCopyStatus('copied');
+      setExportCopyStatus("copied");
     } catch {
-      setExportCopyStatus('failed');
+      setExportCopyStatus("failed");
     }
   }, [exportScriptText, buildExportScript]);
 
   const resetExportCopyStatus = useCallback(() => {
-    setExportCopyStatus('idle');
+    setExportCopyStatus("idle");
   }, []);
 
   const regenerateScript = useCallback(
@@ -607,15 +679,15 @@ export function useExportScript(
       const scriptText = buildExportScript(newProjectPath);
       setExportScriptText(scriptText);
     },
-    [buildExportScript],
+    [buildExportScript]
   );
 
   const getDetectedProjectPath = useCallback(() => {
     if (customProjectPath) return customProjectPath;
 
-    const samplePhoto = photos.find(p => p.filePath);
+    const samplePhoto = photos.find((p) => p.filePath);
     if (samplePhoto?.filePath && samplePhoto.folderHierarchy) {
-      const relativePath = samplePhoto.folderHierarchy.join('/');
+      const relativePath = samplePhoto.folderHierarchy.join("/");
       const fullPath = samplePhoto.filePath;
 
       if (relativePath && fullPath.includes(relativePath)) {
@@ -627,13 +699,13 @@ export function useExportScript(
     }
 
     if (samplePhoto?.filePath) {
-      const parts = samplePhoto.filePath.split('/');
+      const parts = samplePhoto.filePath.split("/");
       if (parts.length > 3) {
-        return parts.slice(0, -2).join('/');
+        return parts.slice(0, -2).join("/");
       }
     }
 
-    return '';
+    return "";
   }, [photos, customProjectPath]);
 
   // Generate and save export manifest
@@ -648,8 +720,14 @@ export function useExportScript(
       sourceRoot: sourceRoot,
     };
 
-    const computedSourceRoot = resolveSourceRoot(projectState as ProjectState, photos);
-    const computedDestRoot = resolveDestinationRoot(projectState as ProjectState, photos);
+    const computedSourceRoot = resolveSourceRoot(
+      projectState as ProjectState,
+      photos
+    );
+    const computedDestRoot = resolveDestinationRoot(
+      projectState as ProjectState,
+      photos
+    );
 
     const manifest = await generateExportManifest(
       photos,
@@ -657,13 +735,20 @@ export function useExportScript(
       computedDestRoot,
       ingested !== false,
       dayLabels,
-      projectSettings,
+      projectSettings
     );
 
     setLastExportManifest(manifest);
     saveExportManifest(projectRootPath, manifest);
     return manifest;
-  }, [photos, dayLabels, projectSettings, projectRootPath, ingested, sourceRoot]);
+  }, [
+    photos,
+    dayLabels,
+    projectSettings,
+    projectRootPath,
+    ingested,
+    sourceRoot,
+  ]);
 
   // Open undo script modal
   const openUndoScriptModal = useCallback(() => {
@@ -672,7 +757,7 @@ export function useExportScript(
     // Try to load existing manifest
     const manifest = loadExportManifest(projectRootPath);
     if (!manifest) {
-      console.warn('No export manifest found for this project');
+      console.warn("No export manifest found for this project");
       return;
     }
 
@@ -688,12 +773,12 @@ export function useExportScript(
   const downloadUndoScript = useCallback(() => {
     if (!undoScriptText) return;
 
-    const blob = new Blob([undoScriptText], { type: 'text/plain' });
+    const blob = new Blob([undoScriptText], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
 
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    link.download = 'narrative-undo-export.sh';
+    link.download = "narrative-undo-export.sh";
     document.body.appendChild(link);
     link.click();
 

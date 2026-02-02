@@ -1,5 +1,16 @@
-import { Dispatch, MutableRefObject, SetStateAction, useCallback, useState } from 'react';
-import { ProjectPhoto, ProjectSettings, ProjectState, saveState } from '../services/projectService';
+import {
+  Dispatch,
+  MutableRefObject,
+  SetStateAction,
+  useCallback,
+  useState,
+} from "react";
+import {
+  ProjectPhoto,
+  ProjectSettings,
+  ProjectState,
+  saveState,
+} from "../services/projectService";
 
 interface UseHistoryOptions {
   photos: ProjectPhoto[];
@@ -37,12 +48,19 @@ export function useHistory({
       };
       saveState(projectRootPath, nextState).catch(() => {});
     },
-    [projectRootPath, projectName, projectFolderLabel, photos, projectSettings, dayLabels],
+    [
+      projectRootPath,
+      projectName,
+      projectFolderLabel,
+      photos,
+      projectSettings,
+      dayLabels,
+    ]
   );
 
   const saveToHistory = useCallback(
     (newPhotos: ProjectPhoto[]) => {
-      const snapshot = photos.map(p => ({
+      const snapshot = photos.map((p) => ({
         id: p.id,
         filePath: p.filePath,
         day: p.day,
@@ -64,9 +82,11 @@ export function useHistory({
       setHistoryIndex(capped.length - 1);
 
       try {
-        const newThumbs = newPhotos.map(p => p.thumbnail).filter(Boolean) as string[];
-        prevThumbnailsRef.current.forEach(url => {
-          if (url && !newThumbs.includes(url) && url.startsWith('blob:')) {
+        const newThumbs = newPhotos
+          .map((p) => p.thumbnail)
+          .filter(Boolean) as string[];
+        prevThumbnailsRef.current.forEach((url) => {
+          if (url && !newThumbs.includes(url) && url.startsWith("blob:")) {
             try {
               URL.revokeObjectURL(url);
             } catch (e) {
@@ -82,13 +102,13 @@ export function useHistory({
       setPhotos(newPhotos);
       persistState(newPhotos);
     },
-    [history, historyIndex, photos, persistState, prevThumbnailsRef, setPhotos],
+    [history, historyIndex, photos, persistState, prevThumbnailsRef, setPhotos]
   );
 
   const undo = useCallback(() => {
     if (historyIndex > 0) {
       const snapshot = history[historyIndex - 1] as Array<any>;
-      const nextPhotos = photos.map(photo => {
+      const nextPhotos = photos.map((photo) => {
         const snap = snapshot.find((s: any) => s.id === photo.id);
         return snap ? { ...photo, ...snap } : photo;
       });
@@ -101,7 +121,7 @@ export function useHistory({
   const redo = useCallback(() => {
     if (historyIndex < history.length - 1) {
       const snapshot = history[historyIndex + 1] as Array<any>;
-      const nextPhotos = photos.map(photo => {
+      const nextPhotos = photos.map((photo) => {
         const snap = snapshot.find((s: any) => s.id === photo.id);
         return snap ? { ...photo, ...snap } : photo;
       });

@@ -1,6 +1,10 @@
-import { useEffect, type MutableRefObject } from 'react';
-import type { ProjectPhoto } from '../services/projectService';
-import { getPhotoIndex, navigatePhotos, type OrderingResult } from '../utils/photoOrdering';
+import { useEffect, type MutableRefObject } from "react";
+import type { ProjectPhoto } from "../services/projectService";
+import {
+  getPhotoIndex,
+  navigatePhotos,
+  type OrderingResult,
+} from "../utils/photoOrdering";
 
 export interface MECEBucket {
   key: string;
@@ -34,7 +38,7 @@ export interface KeyboardHandlerOptions {
   onSetCoverSelectionMode: (mode: boolean) => void;
   onSetHideAssigned: (value: boolean) => void;
   onToggleDebugOverlay?: () => void;
-  onShowToast?: (message: string, tone?: 'info' | 'error') => void;
+  onShowToast?: (message: string, tone?: "info" | "error") => void;
   lastSelectedIndexRef?: MutableRefObject<number | null>;
 }
 
@@ -76,48 +80,55 @@ export function useKeyboardShortcuts(options: KeyboardHandlerOptions) {
         showOnboarding ||
         showExportScript ||
         (target &&
-          (target.tagName === 'INPUT' ||
-            target.tagName === 'TEXTAREA' ||
-            target.tagName === 'SELECT' ||
+          (target.tagName === "INPUT" ||
+            target.tagName === "TEXTAREA" ||
+            target.tagName === "SELECT" ||
             target.isContentEditable))
       ) {
         return;
       }
 
       if (showHelp) {
-        if (e.key === 'Escape' || e.key === '?') {
+        if (e.key === "Escape" || e.key === "?") {
           onSetShowHelp(false);
         }
         return;
       }
 
-      if (coverSelectionMode && e.key === 'Escape') {
+      if (coverSelectionMode && e.key === "Escape") {
         onSetCoverSelectionMode(false);
-        onShowToast?.('Cover selection cancelled.');
+        onShowToast?.("Cover selection cancelled.");
         return;
       }
 
-      if (e.key === '?') {
+      if (e.key === "?") {
         onSetShowHelp(true);
         return;
       }
 
       // Global toggles that should work without a selection
-      if (e.key === 'H' && e.shiftKey) {
+      if (e.key === "H" && e.shiftKey) {
         e.preventDefault();
         const nextValue = !hideAssigned;
         onSetHideAssigned(nextValue);
-        onShowToast?.(nextValue ? 'Hiding assigned photos' : 'Showing all photos', 'info');
+        onShowToast?.(
+          nextValue ? "Hiding assigned photos" : "Showing all photos",
+          "info"
+        );
         return;
       }
 
-      if (e.key.toLowerCase() === 'd' && e.shiftKey && (e.ctrlKey || e.metaKey)) {
+      if (
+        e.key.toLowerCase() === "d" &&
+        e.shiftKey &&
+        (e.ctrlKey || e.metaKey)
+      ) {
         e.preventDefault();
         onToggleDebugOverlay?.();
         return;
       }
 
-      if (e.key === 'z' && (e.metaKey || e.ctrlKey)) {
+      if (e.key === "z" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         if (e.shiftKey) {
           onRedo();
@@ -129,7 +140,8 @@ export function useKeyboardShortcuts(options: KeyboardHandlerOptions) {
 
       // Determine primary target (focused photo, otherwise first selected)
       const primaryId =
-        focusedPhoto || (selectedPhotos.size > 0 ? Array.from(selectedPhotos)[0] : null);
+        focusedPhoto ||
+        (selectedPhotos.size > 0 ? Array.from(selectedPhotos)[0] : null);
       if (!primaryId) return;
 
       const focusPhoto = (photoId: string) => {
@@ -142,18 +154,27 @@ export function useKeyboardShortcuts(options: KeyboardHandlerOptions) {
         }
       };
 
-      if (e.key.toLowerCase() === 'f' && !e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey) {
-        const targets = selectedPhotos.size > 0 ? Array.from(selectedPhotos) : [primaryId];
+      if (
+        e.key.toLowerCase() === "f" &&
+        !e.shiftKey &&
+        !e.metaKey &&
+        !e.ctrlKey &&
+        !e.altKey
+      ) {
+        const targets =
+          selectedPhotos.size > 0 ? Array.from(selectedPhotos) : [primaryId];
         onToggleFavorite(targets);
         return;
       }
 
       // MECE bucket assignment
-      const validBuckets = ['A', 'B', 'C', 'D', 'E', 'M', 'X'];
+      const validBuckets = ["A", "B", "C", "D", "E", "M", "X"];
       const pressedBucket = e.key.toUpperCase();
       const isValidBucket = validBuckets.includes(pressedBucket);
-      const isReservedFavorite = pressedBucket === 'F';
-      const existsInBuckets = MECE_BUCKETS.some(bucket => bucket.key === pressedBucket);
+      const isReservedFavorite = pressedBucket === "F";
+      const existsInBuckets = MECE_BUCKETS.some(
+        (bucket) => bucket.key === pressedBucket
+      );
 
       if (isValidBucket || (existsInBuckets && !isReservedFavorite)) {
         e.preventDefault();
@@ -162,7 +183,10 @@ export function useKeyboardShortcuts(options: KeyboardHandlerOptions) {
         if (selectedPhotos.size > 1) {
           const photoIds = Array.from(selectedPhotos);
           onAssignBucket(photoIds, bucket);
-          onShowToast?.(`Assigned ${photoIds.length} photos to bucket ${bucket}`, 'info');
+          onShowToast?.(
+            `Assigned ${photoIds.length} photos to bucket ${bucket}`,
+            "info"
+          );
           onSetSelectedPhotos(new Set());
           onSetFocusedPhoto(null);
           onSetLastSelectedIndex(null);
@@ -173,15 +197,15 @@ export function useKeyboardShortcuts(options: KeyboardHandlerOptions) {
         }
 
         // Look up current photo from filteredPhotos (most up-to-date source)
-        const currentPhoto = filteredPhotos.find(p => p.id === primaryId);
+        const currentPhoto = filteredPhotos.find((p) => p.id === primaryId);
         if (!currentPhoto) return;
 
-        const newBucket = currentPhoto.bucket === bucket ? '' : bucket;
+        const newBucket = currentPhoto.bucket === bucket ? "" : bucket;
         onAssignBucket([primaryId], newBucket);
 
         // Auto-advance when assigning (not un-assigning) unless shift is held
         if (newBucket && !e.shiftKey) {
-          const nextPhoto = navigatePhotos(primaryId, 'next', orderingResult);
+          const nextPhoto = navigatePhotos(primaryId, "next", orderingResult);
           if (nextPhoto) {
             focusPhoto(nextPhoto.id);
           }
@@ -190,34 +214,38 @@ export function useKeyboardShortcuts(options: KeyboardHandlerOptions) {
       }
 
       // Navigation
-      if (e.key === 'ArrowRight') {
-        const next = navigatePhotos(primaryId, 'next', orderingResult);
+      if (e.key === "ArrowRight") {
+        const next = navigatePhotos(primaryId, "next", orderingResult);
         if (next) {
           focusPhoto(next.id);
         }
-      } else if (e.key === 'ArrowLeft') {
-        const prev = navigatePhotos(primaryId, 'prev', orderingResult);
+      } else if (e.key === "ArrowLeft") {
+        const prev = navigatePhotos(primaryId, "prev", orderingResult);
         if (prev) {
           focusPhoto(prev.id);
         }
-      } else if (e.key === 'j' || e.key === 'J') {
+      } else if (e.key === "j" || e.key === "J") {
         e.preventDefault();
-        const filter = e.shiftKey ? (photo: ProjectPhoto) => !photo.bucket : undefined;
-        const next = navigatePhotos(primaryId, 'next', orderingResult, filter);
+        const filter = e.shiftKey
+          ? (photo: ProjectPhoto) => !photo.bucket
+          : undefined;
+        const next = navigatePhotos(primaryId, "next", orderingResult, filter);
         if (next) {
           focusPhoto(next.id);
         }
-      } else if (e.key === 'k' || e.key === 'K') {
+      } else if (e.key === "k" || e.key === "K") {
         e.preventDefault();
-        const filter = e.shiftKey ? (photo: ProjectPhoto) => !photo.bucket : undefined;
-        const prev = navigatePhotos(primaryId, 'prev', orderingResult, filter);
+        const filter = e.shiftKey
+          ? (photo: ProjectPhoto) => !photo.bucket
+          : undefined;
+        const prev = navigatePhotos(primaryId, "prev", orderingResult, filter);
         if (prev) {
           focusPhoto(prev.id);
         }
-      } else if (e.key === 'Enter' || e.key === ' ') {
+      } else if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         onSetFullscreenPhoto(primaryId);
-      } else if (e.key === 'Escape') {
+      } else if (e.key === "Escape") {
         if (fullscreenPhoto) {
           onSetFullscreenPhoto(null);
         } else {
@@ -231,8 +259,8 @@ export function useKeyboardShortcuts(options: KeyboardHandlerOptions) {
       }
     };
 
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
   }, [
     selectedPhotos,
     focusedPhoto,

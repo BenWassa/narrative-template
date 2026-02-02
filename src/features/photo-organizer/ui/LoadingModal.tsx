@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Loader } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import { Loader } from "lucide-react";
 
 interface LoadingModalProps {
   isOpen: boolean;
@@ -11,8 +11,8 @@ interface LoadingModalProps {
 
 export default function LoadingModal({
   isOpen,
-  title = 'Loading Project',
-  message = 'Please wait while we load your project...',
+  title = "Loading Project",
+  message = "Please wait while we load your project...",
   progress = 0,
   showProgressBar = true,
 }: LoadingModalProps) {
@@ -50,7 +50,9 @@ export default function LoadingModal({
         {showProgressBar && (
           <div className="mt-6">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-xs font-medium text-gray-400">Progress</span>
+              <span className="text-xs font-medium text-gray-400">
+                Progress
+              </span>
               <span className="text-xs font-bold text-blue-400">
                 {Math.round(displayProgress)}%
               </span>
@@ -67,7 +69,7 @@ export default function LoadingModal({
         {/* Loading status text */}
         <div className="mt-6 text-center">
           <p className="text-xs text-gray-500 animate-pulse">
-            {displayProgress === 100 ? 'Almost done...' : 'Loading...'}
+            {displayProgress === 100 ? "Almost done..." : "Loading..."}
           </p>
         </div>
       </div>

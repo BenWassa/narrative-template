@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect } from "react";
 
-import type { ProjectPhoto } from '../services/projectService';
+import type { ProjectPhoto } from "../services/projectService";
 
 interface UseAutoSelectionOptions {
   projectRootPath: string | null;
@@ -31,7 +31,7 @@ export function useAutoSelection({
       photosLength === 0 ||
       selectedRootFolder !== null ||
       selectedDay !== null ||
-      currentView !== 'folders'
+      currentView !== "folders"
     ) {
       return;
     }

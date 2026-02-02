@@ -7,7 +7,7 @@ export interface FolderMapping {
   folder: string;
   folderPath: string;
   detectedDay: number | null;
-  confidence: 'high' | 'medium' | 'low' | 'undetected';
+  confidence: "high" | "medium" | "low" | "undetected";
   patternMatched: string;
   suggestedName: string;
   manual: boolean;
@@ -18,14 +18,14 @@ export interface FolderMapping {
   };
   detectedBuckets?: BucketInfo[];
   isOrganizedStructure?: boolean;
-  bucketConfidence?: 'high' | 'medium' | 'low' | 'none';
+  bucketConfidence?: "high" | "medium" | "low" | "none";
 }
 
 export interface BucketInfo {
   bucketLetter: string;
   folderName: string;
   photoCount: number;
-  confidence: 'high' | 'medium' | 'low';
+  confidence: "high" | "medium" | "low";
   patternMatched: string;
 }
 
@@ -52,11 +52,11 @@ const TIMESTAMP_PATTERN = /(\d{10,13})|(\d{4}(?:\d{2}){2})/;
 
 /**
  * Bucket pattern matchers (in priority order)
- * 
+ *
  * IMPORTANT: The BUCKET_STANDARD_PATTERN is now dynamically generated from MECE_BUCKETS
  * to ensure consistency between bucket definitions and regex patterns.
  * See src/features/photo-organizer/constants/meceBuckets.ts
- * 
+ *
  * Note: We use a Unicode hyphen pattern to match various dash types (-, –, —, −, etc.)
  * because macOS and other systems sometimes auto-correct regular hyphens to en/em dashes.
  */
@@ -67,7 +67,7 @@ const TIMESTAMP_PATTERN = /(\d{10,13})|(\d{4}(?:\d{2}){2})/;
 // - Em dash (U+2014)
 // - Minus sign (U+2212)
 // And underscore + whitespace
-const HYPHEN_PATTERN = '[\\s_\\-–—−]';
+const HYPHEN_PATTERN = "[\\s_\\-–—−]";
 
 // Build the standard bucket pattern from MECE bucket definitions
 // This ensures the pattern always matches the defined bucket categories
@@ -76,21 +76,21 @@ function generateBucketStandardPattern(): RegExp {
   // Fallback categories if import fails
   // Note: Use Unicode hyphen pattern inside category definitions
   const categories = [
-    'Establishing',
-    'People',
+    "Establishing",
+    "People",
     `Culture(?:${HYPHEN_PATTERN}?Detail)?`,
-    'Detail',
+    "Detail",
     `Action(?:${HYPHEN_PATTERN}?Moment)?`,
-    'Moment',
-    'Transition',
+    "Moment",
+    "Transition",
     `(?:Mood${HYPHEN_PATTERN}?Food|Food${HYPHEN_PATTERN}?Mood)`,
-    'Mood',
-    'Food',
-    'Archive',
+    "Mood",
+    "Food",
+    "Archive",
   ];
-  
-  const pattern = `^([A-MX])(?:${HYPHEN_PATTERN}+)(${categories.join('|')})$`;
-  return new RegExp(pattern, 'i');
+
+  const pattern = `^([A-MX])(?:${HYPHEN_PATTERN}+)(${categories.join("|")})$`;
+  return new RegExp(pattern, "i");
 }
 
 const BUCKET_STANDARD_PATTERN = generateBucketStandardPattern();
@@ -102,25 +102,31 @@ const BUCKET_LETTER_PATTERN = /^([A-MX])$/i;
 // Pattern 3: Bucket with custom suffix (medium confidence)
 // Matches: "A_Custom", "B_Whatever", "X_Archive", etc.
 // Uses Unicode hyphen pattern to handle various dash types
-const BUCKET_CUSTOM_PATTERN = new RegExp(`^([A-MX])(?:${HYPHEN_PATTERN}+)(.+)$`, 'i');
+const BUCKET_CUSTOM_PATTERN = new RegExp(
+  `^([A-MX])(?:${HYPHEN_PATTERN}+)(.+)$`,
+  "i"
+);
 
 // Pattern 4: Numeric bucket folders (low confidence)
 // Matches: "01", "02", "03", etc. (could be days or buckets)
 const BUCKET_NUMERIC_PATTERN = /^(0[1-6])$/;
 
 const NUMERIC_TO_BUCKET_MAP: Record<string, string> = {
-  '01': 'A',
-  '02': 'B',
-  '03': 'C',
-  '04': 'D',
-  '05': 'E',
-  '06': 'M',
+  "01": "A",
+  "02": "B",
+  "03": "C",
+  "04": "D",
+  "05": "E",
+  "06": "M",
 };
 
 /**
  * Calculate the day number from a date relative to trip start date
  */
-function calculateDayFromDate(dateStr: string, tripStart?: string): number | null {
+function calculateDayFromDate(
+  dateStr: string,
+  tripStart?: string
+): number | null {
   try {
     const date = new Date(dateStr);
     const start = tripStart ? new Date(tripStart) : date;
@@ -143,14 +149,18 @@ function calculateDayFromDate(dateStr: string, tripStart?: string): number | nul
  */
 function extractDayFromFolderName(
   folderName: string,
-  tripStart?: string,
-): { day: number | null; pattern: string; confidence: 'high' | 'medium' | 'low' } | null {
+  tripStart?: string
+): {
+  day: number | null;
+  pattern: string;
+  confidence: "high" | "medium" | "low";
+} | null {
   // Pattern 1: Day prefix (highest confidence)
   const dayPrefixMatch = folderName.match(DAY_PREFIX_PATTERN);
   if (dayPrefixMatch) {
     const day = parseInt(dayPrefixMatch[1], 10);
     if (day >= 1 && day <= 31) {
-      return { day, pattern: 'day_prefix', confidence: 'high' };
+      return { day, pattern: "day_prefix", confidence: "high" };
     }
   }
 
@@ -162,8 +172,8 @@ function extractDayFromFolderName(
     if (day !== null) {
       return {
         day,
-        pattern: 'iso_date',
-        confidence: tripStart ? 'high' : 'medium',
+        pattern: "iso_date",
+        confidence: tripStart ? "high" : "medium",
       };
     }
   }
@@ -176,8 +186,8 @@ function extractDayFromFolderName(
     if (day !== null) {
       return {
         day,
-        pattern: 'iso_date',
-        confidence: tripStart ? 'high' : 'medium',
+        pattern: "iso_date",
+        confidence: tripStart ? "high" : "medium",
       };
     }
   }
@@ -187,7 +197,7 @@ function extractDayFromFolderName(
   if (numericMatch) {
     const day = parseInt(numericMatch[1], 10);
     if (day >= 1 && day <= 31) {
-      return { day, pattern: 'numeric_prefix', confidence: 'medium' };
+      return { day, pattern: "numeric_prefix", confidence: "medium" };
     }
   }
 
@@ -196,38 +206,48 @@ function extractDayFromFolderName(
 
 export function detectDayNumberFromFolderName(
   folderName: string,
-  tripStart?: string,
+  tripStart?: string
 ): number | null {
   return extractDayFromFolderName(folderName, tripStart)?.day ?? null;
 }
 
 export function detectBucketFromFolderName(
-  folderName: string,
-): { bucket: string; confidence: 'high' | 'medium' | 'low'; pattern: string } | null {
+  folderName: string
+): {
+  bucket: string;
+  confidence: "high" | "medium" | "low";
+  pattern: string;
+} | null {
   // Debug: Log the folder name being tested
-  const isDev = typeof window !== 'undefined' && import.meta?.env?.DEV;
-  
+  const isDev = typeof window !== "undefined" && import.meta?.env?.DEV;
+
   const standardMatch = folderName.match(BUCKET_STANDARD_PATTERN);
   if (standardMatch) {
     if (isDev) {
-      console.log('[detectBucket] STANDARD match:', { folderName, bucket: standardMatch[1].toUpperCase() });
+      console.log("[detectBucket] STANDARD match:", {
+        folderName,
+        bucket: standardMatch[1].toUpperCase(),
+      });
     }
     return {
       bucket: standardMatch[1].toUpperCase(),
-      confidence: 'high',
-      pattern: 'standard',
+      confidence: "high",
+      pattern: "standard",
     };
   }
 
   const letterMatch = folderName.match(BUCKET_LETTER_PATTERN);
   if (letterMatch) {
     if (isDev) {
-      console.log('[detectBucket] LETTER match:', { folderName, bucket: letterMatch[1].toUpperCase() });
+      console.log("[detectBucket] LETTER match:", {
+        folderName,
+        bucket: letterMatch[1].toUpperCase(),
+      });
     }
     return {
       bucket: letterMatch[1].toUpperCase(),
-      confidence: 'high',
-      pattern: 'letter',
+      confidence: "high",
+      pattern: "letter",
     };
   }
 
@@ -235,8 +255,8 @@ export function detectBucketFromFolderName(
   if (customMatch) {
     return {
       bucket: customMatch[1].toUpperCase(),
-      confidence: 'medium',
-      pattern: 'custom',
+      confidence: "medium",
+      pattern: "custom",
     };
   }
 
@@ -244,19 +264,19 @@ export function detectBucketFromFolderName(
   if (numericMatch && NUMERIC_TO_BUCKET_MAP[numericMatch[1]]) {
     return {
       bucket: NUMERIC_TO_BUCKET_MAP[numericMatch[1]],
-      confidence: 'low',
-      pattern: 'numeric',
+      confidence: "low",
+      pattern: "numeric",
     };
   }
 
   // Debug: Log when no pattern matches
   if (isDev && /^[A-MX]/i.test(folderName)) {
-    console.warn('[detectBucket] NO MATCH for folder:', folderName, {
+    console.warn("[detectBucket] NO MATCH for folder:", folderName, {
       testedPatterns: {
         standard: BUCKET_STANDARD_PATTERN.toString(),
         letter: BUCKET_LETTER_PATTERN.toString(),
         custom: BUCKET_CUSTOM_PATTERN.toString(),
-      }
+      },
     });
   }
 
@@ -267,26 +287,30 @@ export function analyzePathStructure(
   filePath: string,
   options?: {
     daysFolder?: string;
-  },
+  }
 ): {
   detectedDay: number | null;
   detectedBucket: string | null;
   isPreOrganized: boolean;
-  confidence: 'high' | 'medium' | 'low' | 'none';
+  confidence: "high" | "medium" | "low" | "none";
   pathSegments: string[];
 } {
-  const daysFolder = options?.daysFolder || '01_DAYS';
+  const daysFolder = options?.daysFolder || "01_DAYS";
   const rawSegments = filePath.split(/[\\/]/).filter(Boolean);
   const pathSegments = rawSegments.length > 0 ? rawSegments.slice(0, -1) : [];
 
   let detectedDay: number | null = null;
   let detectedBucket: string | null = null;
-  let dayConfidence: 'high' | 'medium' | 'low' | 'none' = 'none';
-  let bucketConfidence: 'high' | 'medium' | 'low' | 'none' = 'none';
+  let dayConfidence: "high" | "medium" | "low" | "none" = "none";
+  let bucketConfidence: "high" | "medium" | "low" | "none" = "none";
 
-  const daysIndex = pathSegments.findIndex(segment => {
+  const daysIndex = pathSegments.findIndex((segment) => {
     const lower = segment.toLowerCase();
-    return lower === daysFolder.toLowerCase() || lower === '01_days' || lower === 'days';
+    return (
+      lower === daysFolder.toLowerCase() ||
+      lower === "01_days" ||
+      lower === "days"
+    );
   });
 
   if (daysIndex !== -1 && daysIndex < pathSegments.length - 1) {
@@ -314,7 +338,7 @@ export function analyzePathStructure(
 
       if (dayDetection) {
         detectedDay = dayDetection.day;
-        dayConfidence = dayDetection.confidence === 'high' ? 'medium' : 'low';
+        dayConfidence = dayDetection.confidence === "high" ? "medium" : "low";
 
         if (i + 1 < pathSegments.length) {
           const bucketFolder = pathSegments[i + 1];
@@ -331,15 +355,15 @@ export function analyzePathStructure(
   }
 
   const isPreOrganized = detectedDay !== null && detectedBucket !== null;
-  let overallConfidence: 'high' | 'medium' | 'low' | 'none' = 'none';
+  let overallConfidence: "high" | "medium" | "low" | "none" = "none";
 
   if (isPreOrganized) {
-    if (dayConfidence === 'high' && bucketConfidence === 'high') {
-      overallConfidence = 'high';
-    } else if (dayConfidence !== 'none' && bucketConfidence !== 'none') {
-      overallConfidence = 'medium';
+    if (dayConfidence === "high" && bucketConfidence === "high") {
+      overallConfidence = "high";
+    } else if (dayConfidence !== "none" && bucketConfidence !== "none") {
+      overallConfidence = "medium";
     } else {
-      overallConfidence = 'low';
+      overallConfidence = "low";
     }
   } else if (detectedDay !== null) {
     overallConfidence = dayConfidence;
@@ -355,15 +379,26 @@ export function analyzePathStructure(
 }
 
 export async function detectBucketsInFolder(
-  dirHandle: FileSystemDirectoryHandle,
+  dirHandle: FileSystemDirectoryHandle
 ): Promise<BucketInfo[]> {
   const buckets: BucketInfo[] = [];
-  const supportedExt = ['jpg', 'jpeg', 'png', 'heic', 'webp', 'mp4', 'mov', 'webm', 'avi', 'mkv'];
+  const supportedExt = [
+    "jpg",
+    "jpeg",
+    "png",
+    "heic",
+    "webp",
+    "mp4",
+    "mov",
+    "webm",
+    "avi",
+    "mkv",
+  ];
 
   try {
     // @ts-ignore - entries() is supported in modern browsers
     for await (const [name, handle] of dirHandle.entries()) {
-      if (handle.kind !== 'directory') continue;
+      if (handle.kind !== "directory") continue;
 
       const bucketDetection = detectBucketFromFolderName(name);
       if (!bucketDetection) continue;
@@ -371,8 +406,8 @@ export async function detectBucketsInFolder(
       let photoCount = 0;
       // @ts-ignore
       for await (const [fileName, fileHandle] of handle.entries()) {
-        if (fileHandle.kind !== 'file') continue;
-        const ext = fileName.split('.').pop()?.toLowerCase() || '';
+        if (fileHandle.kind !== "file") continue;
+        const ext = fileName.split(".").pop()?.toLowerCase() || "";
         if (supportedExt.includes(ext)) {
           photoCount += 1;
         }
@@ -387,7 +422,7 @@ export async function detectBucketsInFolder(
       });
     }
   } catch (error) {
-    console.warn('Failed to scan for buckets:', error);
+    console.warn("Failed to scan for buckets:", error);
   }
 
   return buckets.sort((a, b) => a.bucketLetter.localeCompare(b.bucketLetter));
@@ -398,9 +433,9 @@ export async function detectBucketsInFolder(
  */
 function suggestFolderName(day: number | null): string {
   if (day === null) {
-    return 'Unsorted';
+    return "Unsorted";
   }
-  return `Day ${String(day).padStart(2, '0')}`;
+  return `Day ${String(day).padStart(2, "0")}`;
 }
 
 /**
@@ -416,7 +451,7 @@ function shouldSkipFolder(folderName: string): boolean {
     /^_meta$/i,
   ];
 
-  return skipPatterns.some(pattern => pattern.test(folderName));
+  return skipPatterns.some((pattern) => pattern.test(folderName));
 }
 
 /**
@@ -435,9 +470,13 @@ export function detectFolderStructure(
     photoCountMap?: Map<string, number>;
     projectName?: string;
     tripStart?: string;
-  },
+  }
 ): FolderMapping[] {
-  const { photoCountMap = new Map(), projectName = '', tripStart } = options || {};
+  const {
+    photoCountMap = new Map(),
+    projectName = "",
+    tripStart,
+  } = options || {};
 
   const mappings: FolderMapping[] = [];
 
@@ -474,8 +513,8 @@ export function detectFolderStructure(
         folder,
         folderPath: folder,
         detectedDay: null,
-        confidence: 'undetected',
-        patternMatched: 'none',
+        confidence: "undetected",
+        patternMatched: "none",
         suggestedName: suggestFolderName(null),
         manual: false,
         photoCount,
@@ -500,26 +539,26 @@ export function detectFolderStructure(
  * Generate a dry-run summary of what would happen
  */
 function generateDryRunSummary(mappings: FolderMapping[]): string {
-  const createCount = mappings.filter(m => m.detectedDay !== null).length;
+  const createCount = mappings.filter((m) => m.detectedDay !== null).length;
   const totalPhotos = mappings.reduce((sum, m) => sum + m.photoCount, 0);
   const movedPhotos = mappings
-    .filter(m => m.detectedDay !== null)
+    .filter((m) => m.detectedDay !== null)
     .reduce((sum, m) => sum + m.photoCount, 0);
   const skippedPhotos = mappings
-    .filter(m => m.detectedDay === null)
+    .filter((m) => m.detectedDay === null)
     .reduce((sum, m) => sum + m.photoCount, 0);
 
   let summary = `✓ Create ${createCount} folders:\n`;
   mappings
-    .filter(m => m.detectedDay !== null)
-    .forEach(m => {
+    .filter((m) => m.detectedDay !== null)
+    .forEach((m) => {
       summary += `  • ${m.suggestedName}/\n`;
     });
 
   summary += `\n✓ Move ${movedPhotos} photos:\n`;
   mappings
-    .filter(m => m.detectedDay !== null)
-    .forEach(m => {
+    .filter((m) => m.detectedDay !== null)
+    .forEach((m) => {
       summary += `  • ${m.photoCount} from "${m.folder}" → "${m.suggestedName}/"\n`;
     });
 

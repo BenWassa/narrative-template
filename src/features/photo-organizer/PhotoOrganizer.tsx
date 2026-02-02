@@ -1,47 +1,53 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import safeLocalStorage from './utils/safeLocalStorage';
-import OnboardingModal, { RecentProject } from './OnboardingModal';
-import StartScreen from './StartScreen';
-import LoadingModal from './ui/LoadingModal';
-import { versionManager } from '../../lib/versionManager';
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import safeLocalStorage from "./utils/safeLocalStorage";
+import OnboardingModal, { RecentProject } from "./OnboardingModal";
+import StartScreen from "./StartScreen";
+import LoadingModal from "./ui/LoadingModal";
+import { versionManager } from "../../lib/versionManager";
 import {
   deleteProject as deleteProjectService,
   ProjectPhoto,
   saveHandle,
   getHandle,
-} from './services/projectService';
-import { ACTIVE_PROJECT_KEY, RECENT_PROJECTS_KEY } from './constants/projectKeys';
-import { MECE_BUCKETS, isMeceBucketLabel } from './constants/meceBuckets';
-import { useHistory } from './hooks/useHistory';
-import { usePhotoSelection } from './hooks/usePhotoSelection';
-import { useProjectState } from './hooks/useProjectState';
-import { useViewOptions } from './hooks/useViewOptions';
-import { useToast } from './hooks/useToast';
-import { useExportScript } from './hooks/useExportScript';
-import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
-import { useDayEditing } from './hooks/useDayEditing';
-import { useFolderModel } from './hooks/useFolderModel';
-import { useCoverPhoto } from './hooks/useCoverPhoto';
-import { usePhotoMutations } from './hooks/usePhotoMutations';
-import { useAutoSelection } from './hooks/useAutoSelection';
-import { useCoverSelection } from './hooks/useCoverSelection';
-import { useOnboardingHandlers } from './hooks/useOnboardingHandlers';
-import ProjectHeader from './components/ProjectHeader';
-import LeftSidebar from './components/LeftSidebar';
-import PhotoGrid from './components/PhotoGrid';
-import RightSidebar from './components/RightSidebar';
-import HelpModal from './components/HelpModal';
-import ExportScriptModal from './components/ExportScriptModal';
-import UndoScriptModal from './components/UndoScriptModal';
-import Toast from './components/Toast';
-import FullscreenOverlay from './components/FullscreenOverlay';
-import DebugOverlay from './components/DebugOverlay';
-import { sortPhotos } from './utils/photoOrdering';
+} from "./services/projectService";
+import {
+  ACTIVE_PROJECT_KEY,
+  RECENT_PROJECTS_KEY,
+} from "./constants/projectKeys";
+import { MECE_BUCKETS, isMeceBucketLabel } from "./constants/meceBuckets";
+import { useHistory } from "./hooks/useHistory";
+import { usePhotoSelection } from "./hooks/usePhotoSelection";
+import { useProjectState } from "./hooks/useProjectState";
+import { useViewOptions } from "./hooks/useViewOptions";
+import { useToast } from "./hooks/useToast";
+import { useExportScript } from "./hooks/useExportScript";
+import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
+import { useDayEditing } from "./hooks/useDayEditing";
+import { useFolderModel } from "./hooks/useFolderModel";
+import { useCoverPhoto } from "./hooks/useCoverPhoto";
+import { usePhotoMutations } from "./hooks/usePhotoMutations";
+import { useAutoSelection } from "./hooks/useAutoSelection";
+import { useCoverSelection } from "./hooks/useCoverSelection";
+import { useOnboardingHandlers } from "./hooks/useOnboardingHandlers";
+import ProjectHeader from "./components/ProjectHeader";
+import LeftSidebar from "./components/LeftSidebar";
+import PhotoGrid from "./components/PhotoGrid";
+import RightSidebar from "./components/RightSidebar";
+import HelpModal from "./components/HelpModal";
+import ExportScriptModal from "./components/ExportScriptModal";
+import UndoScriptModal from "./components/UndoScriptModal";
+import Toast from "./components/Toast";
+import FullscreenOverlay from "./components/FullscreenOverlay";
+import DebugOverlay from "./components/DebugOverlay";
+import { sortPhotos } from "./utils/photoOrdering";
 
 export default function PhotoOrganizer() {
   const prevThumbnailsRef = useRef<string[]>([]);
-  const [currentVersion, setCurrentVersion] = useState(versionManager.getDisplayVersion());
-  const debugEnabled = import.meta.env.DEV && safeLocalStorage.get('narrative:debug') === '1';
+  const [currentVersion, setCurrentVersion] = useState(
+    versionManager.getDisplayVersion()
+  );
+  const debugEnabled =
+    import.meta.env.DEV && safeLocalStorage.get("narrative:debug") === "1";
   const [coverSelectionMode, setCoverSelectionMode] = useState(false);
   const [debugOverlayEnabled, setDebugOverlayEnabled] = useState(false);
 
@@ -102,7 +108,14 @@ export default function PhotoOrganizer() {
     prevThumbnailsRef,
   });
 
-  const { setHistory, setHistoryIndex, persistState, saveToHistory, undo, redo } = useHistory({
+  const {
+    setHistory,
+    setHistoryIndex,
+    persistState,
+    saveToHistory,
+    undo,
+    redo,
+  } = useHistory({
     photos,
     setPhotos,
     projectRootPath,
@@ -129,7 +142,12 @@ export default function PhotoOrganizer() {
     closeUndoScriptModal,
     downloadUndoScript,
     hasExportManifest,
-  } = useExportScript(photos, dayLabels, projectSettings, projectRootPath || undefined);
+  } = useExportScript(
+    photos,
+    dayLabels,
+    projectSettings,
+    projectRootPath || undefined
+  );
 
   const { setCoverForPhotoId } = useCoverPhoto({
     photos,
@@ -149,7 +167,7 @@ export default function PhotoOrganizer() {
       } catch (error) {
         // Keep build-time version as fallback
         if (debugEnabled) {
-          console.warn('Failed to fetch runtime version:', error);
+          console.warn("Failed to fetch runtime version:", error);
         }
       }
     };
@@ -180,22 +198,23 @@ export default function PhotoOrganizer() {
   });
 
   const isVideoPhoto = useCallback((photo: ProjectPhoto) => {
-    if (photo.mimeType?.startsWith('video/')) return true;
-    const ext = photo.originalName.split('.').pop()?.toLowerCase() || '';
-    return ['mp4', 'mov', 'webm', 'avi', 'mkv'].includes(ext);
+    if (photo.mimeType?.startsWith("video/")) return true;
+    const ext = photo.originalName.split(".").pop()?.toLowerCase() || "";
+    return ["mp4", "mov", "webm", "avi", "mkv"].includes(ext);
   }, []);
 
   const orderingResult = React.useMemo(() => {
     const rootPhotosForOrdering =
-      currentView === 'folders' && selectedRootFolder
-        ? (rootGroups.find(group => group[0] === selectedRootFolder)?.[1] || []).filter(
-            photo => !photo.archived,
-          )
+      currentView === "folders" && selectedRootFolder
+        ? (
+            rootGroups.find((group) => group[0] === selectedRootFolder)?.[1] ||
+            []
+          ).filter((photo) => !photo.archived)
         : null;
     const displayPhotosForOrdering = rootPhotosForOrdering ?? filteredPhotos;
 
     return sortPhotos(displayPhotosForOrdering, {
-      groupBy: selectedDay !== null ? 'subfolder' : null,
+      groupBy: selectedDay !== null ? "subfolder" : null,
       separateVideos: true,
       selectedDay,
       getSubfolderGroup,
@@ -273,11 +292,12 @@ export default function PhotoOrganizer() {
     setSelectedRootFolder,
   });
 
-  const { assignBucket, removeDayAssignment, toggleFavorite } = usePhotoMutations({
-    photos,
-    saveToHistory,
-    selectedDay,
-  });
+  const { assignBucket, removeDayAssignment, toggleFavorite } =
+    usePhotoMutations({
+      photos,
+      saveToHistory,
+      selectedDay,
+    });
 
   // Keyboard shortcuts
   // Keyboard shortcuts handler
@@ -305,7 +325,7 @@ export default function PhotoOrganizer() {
     onSetShowHelp: setShowHelp,
     onSetCoverSelectionMode: setCoverSelectionMode,
     onSetHideAssigned: setHideAssigned,
-    onToggleDebugOverlay: () => setDebugOverlayEnabled(prev => !prev),
+    onToggleDebugOverlay: () => setDebugOverlayEnabled((prev) => !prev),
     onShowToast: showToast,
     lastSelectedIndexRef,
   });
@@ -314,13 +334,13 @@ export default function PhotoOrganizer() {
   const stats = React.useMemo(
     () => ({
       total: photos.length,
-      sorted: photos.filter(p => p.bucket && !p.archived).length,
-      unsorted: photos.filter(p => !p.bucket && !p.archived).length,
-      archived: photos.filter(p => p.archived).length,
-      favorites: photos.filter(p => p.favorite).length,
-      root: photos.filter(p => p.day === null && !p.archived).length,
+      sorted: photos.filter((p) => p.bucket && !p.archived).length,
+      unsorted: photos.filter((p) => !p.bucket && !p.archived).length,
+      archived: photos.filter((p) => p.archived).length,
+      favorites: photos.filter((p) => p.favorite).length,
+      root: photos.filter((p) => p.day === null && !p.archived).length,
     }),
-    [photos],
+    [photos]
   );
 
   return (
@@ -349,8 +369,8 @@ export default function PhotoOrganizer() {
         onStartCoverSelection={() => {
           setCoverSelectionMode(true);
           showToast(
-            'Select a photo to set as cover. Click a photo to set, or press Esc to cancel.',
-            'info',
+            "Select a photo to set as cover. Click a photo to set, or press Esc to cancel.",
+            "info"
           );
         }}
         onUseCoverSelection={async () => {
@@ -359,9 +379,9 @@ export default function PhotoOrganizer() {
         }}
         onCancelCoverSelection={() => {
           setCoverSelectionMode(false);
-          showToast('Cover selection cancelled.');
+          showToast("Cover selection cancelled.");
         }}
-        onSelectRecentProject={projectId => {
+        onSelectRecentProject={(projectId) => {
           loadProject(projectId);
         }}
         onOpenProject={() => {
@@ -370,20 +390,22 @@ export default function PhotoOrganizer() {
         onDeleteProject={async () => {
           if (!projectRootPath) return;
           const confirmed = window.confirm(
-            `Delete project '${projectName}'? This will remove local state and stored folder access. This cannot be undone.`,
+            `Delete project '${projectName}'? This will remove local state and stored folder access. This cannot be undone.`
           );
           if (!confirmed) return;
           try {
             await deleteProjectService(projectRootPath);
           } catch (err) {
-            showToast('Failed to delete project.', 'error');
+            showToast("Failed to delete project.", "error");
             return;
           }
 
           try {
             const raw = safeLocalStorage.get(RECENT_PROJECTS_KEY);
             const parsed = raw ? (JSON.parse(raw) as RecentProject[]) : [];
-            const filtered = parsed.filter(p => p.projectId !== projectRootPath);
+            const filtered = parsed.filter(
+              (p) => p.projectId !== projectRootPath
+            );
             safeLocalStorage.set(RECENT_PROJECTS_KEY, JSON.stringify(filtered));
             setRecentProjects(filtered);
           } catch (e) {
@@ -393,9 +415,9 @@ export default function PhotoOrganizer() {
           safeLocalStorage.remove(ACTIVE_PROJECT_KEY);
           setPhotos([]);
           setProjectRootPath(null);
-          setProjectName('No Project');
+          setProjectName("No Project");
           setShowWelcome(true);
-          showToast('Project deleted.');
+          showToast("Project deleted.");
         }}
         onImportTrip={() => {
           setProjectError(null);
@@ -405,8 +427,8 @@ export default function PhotoOrganizer() {
         onUndoExport={openUndoScriptModal}
         onShowHelp={() => setShowHelp(true)}
         onRetryPermission={retryProjectPermission}
-        onChangeView={viewId => setCurrentView(viewId)}
-        onToggleHideAssigned={() => setHideAssigned(prev => !prev)}
+        onChangeView={(viewId) => setCurrentView(viewId)}
+        onToggleHideAssigned={() => setHideAssigned((prev) => !prev)}
         onRememberFoldersViewState={() => {
           foldersViewStateRef.current = { selectedRootFolder, selectedDay };
         }}
@@ -464,22 +486,32 @@ export default function PhotoOrganizer() {
               galleryViewPhoto={galleryViewPhoto}
               dayLabels={dayLabels}
               buckets={MECE_BUCKETS}
-              onSelectPhoto={photoId => setSelectedPhotos(new Set([photoId]))}
-              onOpenViewer={photoId => setGalleryViewPhoto(photoId)}
+              onSelectPhoto={(photoId) => setSelectedPhotos(new Set([photoId]))}
+              onOpenViewer={(photoId) => setGalleryViewPhoto(photoId)}
               onCloseViewer={() => setGalleryViewPhoto(null)}
-              onNavigateViewer={photoId => setGalleryViewPhoto(photoId)}
-              onToggleFavorite={photoId => {
-                setPhotos(prev =>
-                  prev.map(p => (p.id === photoId ? { ...p, favorite: !p.favorite } : p)),
+              onNavigateViewer={(photoId) => setGalleryViewPhoto(photoId)}
+              onToggleFavorite={(photoId) => {
+                setPhotos((prev) =>
+                  prev.map((p) =>
+                    p.id === photoId ? { ...p, favorite: !p.favorite } : p
+                  )
                 );
                 persistState(
-                  photos.map(p => (p.id === photoId ? { ...p, favorite: !p.favorite } : p)),
+                  photos.map((p) =>
+                    p.id === photoId ? { ...p, favorite: !p.favorite } : p
+                  )
                 );
               }}
-              onAssignBucket={(photoId, bucket) => assignBucket(photoId, bucket)}
+              onAssignBucket={(photoId, bucket) =>
+                assignBucket(photoId, bucket)
+              }
               onAssignDay={(photoId, day) => {
-                setPhotos(prev => prev.map(p => (p.id === photoId ? { ...p, day } : p)));
-                persistState(photos.map(p => (p.id === photoId ? { ...p, day } : p)));
+                setPhotos((prev) =>
+                  prev.map((p) => (p.id === photoId ? { ...p, day } : p))
+                );
+                persistState(
+                  photos.map((p) => (p.id === photoId ? { ...p, day } : p))
+                );
               }}
               onSaveToHistory={saveToHistory}
               onShowToast={showToast}
@@ -538,7 +570,11 @@ export default function PhotoOrganizer() {
       />
 
       {/* Help Modal */}
-      <HelpModal isOpen={showHelp} buckets={MECE_BUCKETS} onClose={() => setShowHelp(false)} />
+      <HelpModal
+        isOpen={showHelp}
+        buckets={MECE_BUCKETS}
+        onClose={() => setShowHelp(false)}
+      />
 
       {/* Toast Notification */}
       <Toast toast={toast} onDismiss={clearToast} />
@@ -561,15 +597,16 @@ export default function PhotoOrganizer() {
             safeLocalStorage.set(ACTIVE_PROJECT_KEY, projectRootPath);
           }}
           onCreateComplete={handleOnboardingComplete}
-          onOpenProject={async rootPath => {
+          onOpenProject={async (rootPath) => {
             setProjectError(null);
             // Check if File System API is available before attempting to load (skip in test environment)
             const isTest =
-              typeof globalThis !== 'undefined' &&
-              ((globalThis as any).vitest || (globalThis as any).__APP_VERSION__ === '0.0.0');
-            if (!isTest && !('showDirectoryPicker' in window)) {
+              typeof globalThis !== "undefined" &&
+              ((globalThis as any).vitest ||
+                (globalThis as any).__APP_VERSION__ === "0.0.0");
+            if (!isTest && !("showDirectoryPicker" in window)) {
               setProjectError(
-                'This app requires the File System Access API, which is not available in this browser environment. Please use a compatible browser like Chrome or Edge.',
+                "This app requires the File System Access API, which is not available in this browser environment. Please use a compatible browser like Chrome or Edge."
               );
               return;
             }
@@ -593,7 +630,10 @@ export default function PhotoOrganizer() {
                   return;
                 } catch (pickErr) {
                   // User cancelled or an error occurred — fall back to onboarding modal to guide reselection
-                  console.warn('Folder re-selection cancelled or failed:', pickErr);
+                  console.warn(
+                    "Folder re-selection cancelled or failed:",
+                    pickErr
+                  );
                   setProjectNeedingReselection(rootPath);
                   setShowOnboarding(true);
                   return;
@@ -604,7 +644,10 @@ export default function PhotoOrganizer() {
               loadProject(rootPath);
             } catch (err) {
               // Error checking handle, fall back to onboarding modal
-              console.warn('Error checking stored handle on project open:', err);
+              console.warn(
+                "Error checking stored handle on project open:",
+                err
+              );
               setProjectNeedingReselection(rootPath);
               setShowOnboarding(true);
             }
@@ -620,9 +663,11 @@ export default function PhotoOrganizer() {
           setShowOnboarding(false);
           setProjectNeedingReselection(null);
         }}
-        onComplete={state => handleOnboardingComplete(state, projectNeedingReselection)}
+        onComplete={(state) =>
+          handleOnboardingComplete(state, projectNeedingReselection)
+        }
         recentProjects={recentProjects}
-        onSelectRecent={rootPath => {
+        onSelectRecent={(rootPath) => {
           setProjectError(null);
           setProjectNeedingReselection(null);
           setShowOnboarding(false);

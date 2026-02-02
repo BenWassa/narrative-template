@@ -1,6 +1,6 @@
-import { ChevronLeft, Pencil, Save, X as XIcon } from 'lucide-react';
-import { detectDayNumberFromFolderName } from '../../../lib/folderDetectionService';
-import type { ProjectPhoto, ProjectSettings } from '../services/projectService';
+import { ChevronLeft, Pencil, Save, X as XIcon } from "lucide-react";
+import { detectDayNumberFromFolderName } from "../../../lib/folderDetectionService";
+import type { ProjectPhoto, ProjectSettings } from "../services/projectService";
 
 interface FolderCategory {
   folder: string;
@@ -72,7 +72,7 @@ export default function LeftSidebar({
   projectSettings,
   debugEnabled,
 }: LeftSidebarProps) {
-  if (currentView === 'days' && sidebarCollapsed) {
+  if (currentView === "days" && sidebarCollapsed) {
     return (
       <button
         onClick={onExpandSidebar}
@@ -85,12 +85,14 @@ export default function LeftSidebar({
     );
   }
 
-  if (currentView === 'days') {
+  if (currentView === "days") {
     return (
       <aside className="w-48 border-r border-gray-800 bg-gray-900 overflow-y-auto">
         <div className="p-4">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-xs font-semibold text-gray-400 uppercase">Days</h3>
+            <h3 className="text-xs font-semibold text-gray-400 uppercase">
+              Days
+            </h3>
             <button
               onClick={onCollapseSidebar}
               className="p-1 hover:bg-gray-800 rounded"
@@ -110,14 +112,16 @@ export default function LeftSidebar({
                   onSelectRootFolder(null);
                   onSelectDay(day);
                 }}
-                onKeyDown={e => {
-                  if (e.key === 'Enter') {
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
                     onSelectRootFolder(null);
                     onSelectDay(day);
                   }
                 }}
                 className={`w-full text-left px-3 py-2 rounded text-sm transition-colors ${
-                  selectedDay === day ? 'bg-blue-600 text-white' : 'hover:bg-gray-800 text-gray-300'
+                  selectedDay === day
+                    ? "bg-blue-600 text-white"
+                    : "hover:bg-gray-800 text-gray-300"
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -125,11 +129,11 @@ export default function LeftSidebar({
                     <div className="flex items-center gap-2 w-full">
                       <input
                         value={editingDayName}
-                        onChange={e => onChangeEditingDayName(e.target.value)}
+                        onChange={(e) => onChangeEditingDayName(e.target.value)}
                         className="w-full px-2 py-1 rounded bg-gray-800 text-sm text-gray-100"
                       />
                       <button
-                        onClick={e => {
+                        onClick={(e) => {
                           e.stopPropagation();
                           onSaveDayName(day);
                         }}
@@ -139,7 +143,7 @@ export default function LeftSidebar({
                         <Save className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={e => {
+                        onClick={(e) => {
                           e.stopPropagation();
                           onCancelEditingDay();
                         }}
@@ -152,12 +156,13 @@ export default function LeftSidebar({
                   ) : (
                     <>
                       <div className="font-medium">
-                        {dayLabels[day] || `Day ${String(day).padStart(2, '0')}`}
+                        {dayLabels[day] ||
+                          `Day ${String(day).padStart(2, "0")}`}
                       </div>
                       <div className="flex items-center gap-2">
                         {selectedDay === day && (
                           <button
-                            onClick={e => {
+                            onClick={(e) => {
                               e.stopPropagation();
                               onClearSelectedDay();
                             }}
@@ -169,11 +174,12 @@ export default function LeftSidebar({
                           </button>
                         )}
                         <button
-                          onClick={e => {
+                          onClick={(e) => {
                             e.stopPropagation();
                             onStartEditingDay(
                               day,
-                              dayLabels[day] || `Day ${String(day).padStart(2, '0')}`,
+                              dayLabels[day] ||
+                                `Day ${String(day).padStart(2, "0")}`
                             );
                           }}
                           className="p-1"
@@ -185,7 +191,9 @@ export default function LeftSidebar({
                     </>
                   )}
                 </div>
-                <div className="text-xs opacity-70">{dayPhotos.length} photos</div>
+                <div className="text-xs opacity-70">
+                  {dayPhotos.length} photos
+                </div>
               </div>
             ))}
           </div>
@@ -194,24 +202,30 @@ export default function LeftSidebar({
     );
   }
 
-  if (currentView !== 'folders') return null;
+  if (currentView !== "folders") return null;
 
   return (
     <aside className="w-48 border-r border-gray-800 bg-gray-900 overflow-y-auto">
       <div className="p-4">
-        <h3 className="text-xs font-semibold text-gray-400 uppercase mb-3">Days</h3>
+        <h3 className="text-xs font-semibold text-gray-400 uppercase mb-3">
+          Days
+        </h3>
         <div className="space-y-1 mb-4">
           {(() => {
             const daysByNumber = new Map<
               number,
-              { dayNumber: number; photos: ProjectPhoto[]; folderName: string | null }
+              {
+                dayNumber: number;
+                photos: ProjectPhoto[];
+                folderName: string | null;
+              }
             >();
             const selectedContainers = dayContainers || [];
             const selectedTopLevelContainers: string[] = [];
             const selectedPathContainers: string[] = [];
-            selectedContainers.forEach(container => {
+            selectedContainers.forEach((container) => {
               const normalized = normalizePath(container);
-              if (normalized.includes('/')) {
+              if (normalized.includes("/")) {
                 selectedPathContainers.push(normalized);
               } else {
                 selectedTopLevelContainers.push(normalized);
@@ -220,20 +234,29 @@ export default function LeftSidebar({
 
             const getPhotosForPath = (path: string) => {
               const normalized = normalizePath(path);
-              return photos.filter(p => {
-                const filePath = normalizePath(p.filePath || p.originalName || '');
-                return filePath === normalized || filePath.startsWith(`${normalized}/`);
+              return photos.filter((p) => {
+                const filePath = normalizePath(
+                  p.filePath || p.originalName || ""
+                );
+                return (
+                  filePath === normalized ||
+                  filePath.startsWith(`${normalized}/`)
+                );
               });
             };
 
             days.forEach(([d, photosForDay]) => {
               if (!daysByNumber.has(d)) {
-                daysByNumber.set(d, { dayNumber: d, photos: photosForDay, folderName: null });
+                daysByNumber.set(d, {
+                  dayNumber: d,
+                  photos: photosForDay,
+                  folderName: null,
+                });
               }
             });
 
-            selectedPathContainers.forEach(containerPath => {
-              const lastSegment = containerPath.split('/').slice(-1)[0];
+            selectedPathContainers.forEach((containerPath) => {
+              const lastSegment = containerPath.split("/").slice(-1)[0];
               const dayNumber = detectDayNumberFromFolderName(lastSegment);
               if (dayNumber == null || daysByNumber.has(dayNumber)) return;
               daysByNumber.set(dayNumber, {
@@ -247,14 +270,17 @@ export default function LeftSidebar({
             if (daysContainer) {
               const normalizedDaysContainer = normalizePath(daysContainer);
               const dayFolderMap = new Map<number, ProjectPhoto[]>();
-              photos.forEach(p => {
-                const filePath = normalizePath(p.filePath || p.originalName || '');
-                const parts = filePath.split('/');
+              photos.forEach((p) => {
+                const filePath = normalizePath(
+                  p.filePath || p.originalName || ""
+                );
+                const parts = filePath.split("/");
                 if (parts.length < 2) return;
                 if (parts[0] !== normalizedDaysContainer) return;
                 const dayNumber = detectDayNumberFromFolderName(parts[1]);
                 if (dayNumber == null) return;
-                if (!dayFolderMap.has(dayNumber)) dayFolderMap.set(dayNumber, []);
+                if (!dayFolderMap.has(dayNumber))
+                  dayFolderMap.set(dayNumber, []);
                 dayFolderMap.get(dayNumber)!.push(p);
               });
               dayFolderMap.forEach((dayPhotos, dayNumber) => {
@@ -263,7 +289,8 @@ export default function LeftSidebar({
                     dayNumber,
                     photos: dayPhotos,
                     folderName: `${normalizedDaysContainer}/${
-                      dayLabels[dayNumber] || `Day ${String(dayNumber).padStart(2, '0')}`
+                      dayLabels[dayNumber] ||
+                      `Day ${String(dayNumber).padStart(2, "0")}`
                     }`,
                   });
                 }
@@ -277,15 +304,15 @@ export default function LeftSidebar({
               ...categorized.dayLike,
             ];
             if (debugEnabled) {
-              console.debug('[PhotoOrganizer] Folder categorization:', {
-                selected: categorized.selected.map(f => f.folder),
-                nonDay: categorized.nonDay.map(f => f.folder),
-                dayLike: categorized.dayLike.map(f => f.folder),
+              console.debug("[PhotoOrganizer] Folder categorization:", {
+                selected: categorized.selected.map((f) => f.folder),
+                nonDay: categorized.nonDay.map((f) => f.folder),
+                dayLike: categorized.dayLike.map((f) => f.folder),
               });
             }
 
             rootGroups.forEach(([folderName, folderPhotos]) => {
-              const cat = categorizedList.find(f => f.folder === folderName);
+              const cat = categorizedList.find((f) => f.folder === folderName);
               if (
                 cat &&
                 cat.isDayLike &&
@@ -293,7 +320,7 @@ export default function LeftSidebar({
                 !daysByNumber.has(cat.dayNumber)
               ) {
                 const photosForDay = folderPhotos.filter(
-                  p => p.day === cat.dayNumber || p.day === null,
+                  (p) => p.day === cat.dayNumber || p.day === null
                 );
                 daysByNumber.set(cat.dayNumber, {
                   dayNumber: cat.dayNumber,
@@ -304,17 +331,21 @@ export default function LeftSidebar({
             });
 
             const displayDays = Array.from(daysByNumber.values()).sort(
-              (a, b) => a.dayNumber - b.dayNumber,
+              (a, b) => a.dayNumber - b.dayNumber
             );
 
-            const selectedWithoutDay = selectedTopLevelContainers.filter(containerName => {
-              const cat = categorizedList.find(f => f.folder === containerName);
-              return cat?.dayNumber === null;
-            });
+            const selectedWithoutDay = selectedTopLevelContainers.filter(
+              (containerName) => {
+                const cat = categorizedList.find(
+                  (f) => f.folder === containerName
+                );
+                return cat?.dayNumber === null;
+              }
+            );
 
             return (
               <>
-                {displayDays.map(entry => (
+                {displayDays.map((entry) => (
                   <div
                     key={`day-${entry.dayNumber}`}
                     role="button"
@@ -323,16 +354,16 @@ export default function LeftSidebar({
                       onSelectRootFolder(null);
                       onSelectDay(entry.dayNumber);
                     }}
-                    onKeyDown={e => {
-                      if (e.key === 'Enter') {
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
                         onSelectRootFolder(null);
                         onSelectDay(entry.dayNumber);
                       }
                     }}
                     className={`w-full text-left px-3 py-2 rounded text-sm transition-colors ${
                       selectedDay === entry.dayNumber
-                        ? 'bg-blue-600 text-white'
-                        : 'hover:bg-gray-800 text-gray-300'
+                        ? "bg-blue-600 text-white"
+                        : "hover:bg-gray-800 text-gray-300"
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -340,11 +371,13 @@ export default function LeftSidebar({
                         <div className="flex items-center gap-2 w-full">
                           <input
                             value={editingDayName}
-                            onChange={e => onChangeEditingDayName(e.target.value)}
+                            onChange={(e) =>
+                              onChangeEditingDayName(e.target.value)
+                            }
                             className="w-full px-2 py-1 rounded bg-gray-800 text-sm text-gray-100"
                           />
                           <button
-                            onClick={e => {
+                            onClick={(e) => {
                               e.stopPropagation();
                               onSaveDayName(entry.dayNumber);
                             }}
@@ -354,7 +387,7 @@ export default function LeftSidebar({
                             <Save className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={e => {
+                            onClick={(e) => {
                               e.stopPropagation();
                               onCancelEditingDay();
                             }}
@@ -368,16 +401,19 @@ export default function LeftSidebar({
                         <>
                           <div className="font-medium">
                             {dayLabels[entry.dayNumber] ||
-                              `Day ${String(entry.dayNumber).padStart(2, '0')}`}
+                              `Day ${String(entry.dayNumber).padStart(2, "0")}`}
                           </div>
                           <div className="flex items-center gap-2">
                             <button
-                              onClick={e => {
+                              onClick={(e) => {
                                 e.stopPropagation();
                                 onStartEditingDay(
                                   entry.dayNumber,
                                   dayLabels[entry.dayNumber] ||
-                                    `Day ${String(entry.dayNumber).padStart(2, '0')}`,
+                                    `Day ${String(entry.dayNumber).padStart(
+                                      2,
+                                      "0"
+                                    )}`
                                 );
                               }}
                               className="p-1"
@@ -389,11 +425,13 @@ export default function LeftSidebar({
                         </>
                       )}
                     </div>
-                    <div className="text-xs opacity-70">{entry.photos.length} photos</div>
+                    <div className="text-xs opacity-70">
+                      {entry.photos.length} photos
+                    </div>
                   </div>
                 ))}
 
-                {selectedWithoutDay.map(containerName => (
+                {selectedWithoutDay.map((containerName) => (
                   <div
                     key={`container-${containerName}`}
                     role="button"
@@ -404,8 +442,8 @@ export default function LeftSidebar({
                     }}
                     className={`w-full text-left px-3 py-2 rounded text-sm transition-colors ${
                       selectedRootFolder === containerName
-                        ? 'bg-blue-600 text-white'
-                        : 'hover:bg-gray-800 text-gray-300'
+                        ? "bg-blue-600 text-white"
+                        : "hover:bg-gray-800 text-gray-300"
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -415,7 +453,9 @@ export default function LeftSidebar({
                       </div>
                     </div>
                     <div className="text-xs opacity-70">
-                      {rootGroups.find(([name]) => name === containerName)?.[1].length || 0} photos
+                      {rootGroups.find(([name]) => name === containerName)?.[1]
+                        .length || 0}{" "}
+                      photos
                     </div>
                   </div>
                 ))}
@@ -424,21 +464,28 @@ export default function LeftSidebar({
           })()}
         </div>
 
-        <h3 className="text-xs font-semibold text-gray-400 uppercase mb-3">Other</h3>
+        <h3 className="text-xs font-semibold text-gray-400 uppercase mb-3">
+          Other
+        </h3>
         <div className="space-y-1">
           {(() => {
             const { selected, nonDay } = sortFolders(displayRootGroups);
             const daysContainer = projectSettings?.folderStructure?.daysFolder;
-            const nestedOtherFolders: Array<{ key: string; label: string; items: ProjectPhoto[] }> =
-              [];
+            const nestedOtherFolders: Array<{
+              key: string;
+              label: string;
+              items: ProjectPhoto[];
+            }> = [];
 
             if (daysContainer) {
               const normalizedDaysContainer = normalizePath(daysContainer);
               const nestedMap = new Map<string, ProjectPhoto[]>();
-              photos.forEach(p => {
+              photos.forEach((p) => {
                 if (p.archived) return;
-                const filePath = normalizePath(p.filePath || p.originalName || '');
-                const parts = filePath.split('/');
+                const filePath = normalizePath(
+                  p.filePath || p.originalName || ""
+                );
+                const parts = filePath.split("/");
                 if (parts.length < 3) return;
                 if (parts[0] !== normalizedDaysContainer) return;
                 const dayNumber = detectDayNumberFromFolderName(parts[1]);
@@ -459,7 +506,7 @@ export default function LeftSidebar({
             }
 
             const combinedOtherFolders = [
-              ...nonDay.map(f => ({
+              ...nonDay.map((f) => ({
                 key: f.folder,
                 label: f.folder,
                 items: f.items,
@@ -469,7 +516,7 @@ export default function LeftSidebar({
 
             return (
               <>
-                {combinedOtherFolders.map(f => (
+                {combinedOtherFolders.map((f) => (
                   <div
                     key={f.key}
                     role="button"
@@ -480,8 +527,8 @@ export default function LeftSidebar({
                     }}
                     className={`w-full text-left px-3 py-2 rounded text-sm transition-colors ${
                       selectedRootFolder === f.key
-                        ? 'bg-blue-600 text-white'
-                        : 'hover:bg-gray-800 text-gray-300'
+                        ? "bg-blue-600 text-white"
+                        : "hover:bg-gray-800 text-gray-300"
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -489,8 +536,8 @@ export default function LeftSidebar({
                       <div className="flex gap-2" />
                     </div>
                     <div className="text-xs opacity-70">
-                      {f.items.length} photos ({f.items.filter(p => p.day === null).length}{' '}
-                      unsorted)
+                      {f.items.length} photos (
+                      {f.items.filter((p) => p.day === null).length} unsorted)
                     </div>
                   </div>
                 ))}

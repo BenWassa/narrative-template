@@ -1,5 +1,5 @@
-import React from 'react';
-import { X } from 'lucide-react';
+import React from "react";
+import { X } from "lucide-react";
 
 export interface MECEBucket {
   key: string;
@@ -14,7 +14,11 @@ interface HelpModalProps {
   onClose: () => void;
 }
 
-export default function HelpModal({ isOpen, buckets, onClose }: HelpModalProps) {
+export default function HelpModal({
+  isOpen,
+  buckets,
+  onClose,
+}: HelpModalProps) {
   if (!isOpen) return null;
 
   return (
@@ -30,19 +34,27 @@ export default function HelpModal({ isOpen, buckets, onClose }: HelpModalProps) 
 
           <div className="space-y-6">
             <div>
-              <h3 className="font-semibold text-blue-400 mb-3">MECE Categories</h3>
+              <h3 className="font-semibold text-blue-400 mb-3">
+                MECE Categories
+              </h3>
               <div className="grid grid-cols-2 gap-2">
-                {buckets.map(bucket => (
-                  <div key={bucket.key} className="flex items-center gap-3 text-sm">
-                    <kbd className={`px-2 py-1 rounded ${bucket.color} text-white font-bold`}>
-                      {bucket.key === 'F' ? 'M' : bucket.key}
+                {buckets.map((bucket) => (
+                  <div
+                    key={bucket.key}
+                    className="flex items-center gap-3 text-sm"
+                  >
+                    <kbd
+                      className={`px-2 py-1 rounded ${bucket.color} text-white font-bold`}
+                    >
+                      {bucket.key === "F" ? "M" : bucket.key}
                     </kbd>
                     <span>{bucket.label}</span>
                   </div>
                 ))}
               </div>
               <p className="text-xs text-gray-400 mt-3">
-                Keyboard shortcuts: A–E, X, M (Mood/Food). F is reserved for Favorite.
+                Keyboard shortcuts: A–E, X, M (Mood/Food). F is reserved for
+                Favorite.
               </p>
             </div>
 
@@ -58,7 +70,9 @@ export default function HelpModal({ isOpen, buckets, onClose }: HelpModalProps) 
                   <span>Next / Previous (grid)</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <kbd className="px-2 py-1 bg-gray-800 rounded">Shift+J / Shift+K</kbd>
+                  <kbd className="px-2 py-1 bg-gray-800 rounded">
+                    Shift+J / Shift+K
+                  </kbd>
                   <span>Next / Previous unassigned</span>
                 </div>
                 <div className="flex items-center gap-3">
@@ -100,7 +114,9 @@ export default function HelpModal({ isOpen, buckets, onClose }: HelpModalProps) 
                   <span>Redo (keyboard)</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <kbd className="px-2 py-1 bg-gray-800 rounded">Ctrl+Shift+D</kbd>
+                  <kbd className="px-2 py-1 bg-gray-800 rounded">
+                    Ctrl+Shift+D
+                  </kbd>
                   <span>Toggle debug overlay</span>
                 </div>
                 <div className="flex items-center gap-3">

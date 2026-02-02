@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from "react";
 
-import { detectDayNumberFromFolderName } from '../../../lib/folderDetectionService';
-import type { ProjectPhoto, ProjectSettings } from '../services/projectService';
-import { sortPhotos } from '../utils/photoOrdering';
+import { detectDayNumberFromFolderName } from "../../../lib/folderDetectionService";
+import type { ProjectPhoto, ProjectSettings } from "../services/projectService";
+import { sortPhotos } from "../utils/photoOrdering";
 
 export interface FolderCategory {
   folder: string;
@@ -38,7 +38,7 @@ export function useFolderModel({
 }: UseFolderModelOptions) {
   const days = useMemo(() => {
     const dayMap = new Map<number, ProjectPhoto[]>();
-    photos.forEach(photo => {
+    photos.forEach((photo) => {
       if (photo.day) {
         if (!dayMap.has(photo.day)) {
           dayMap.set(photo.day, []);
@@ -51,11 +51,11 @@ export function useFolderModel({
 
   const visibleDays = useMemo(
     () => days.filter(([day]) => dayLabels[day] != null),
-    [days, dayLabels],
+    [days, dayLabels]
   );
 
   const normalizePath = useCallback((value: string) => {
-    return value.split(/[\\/]/).filter(Boolean).join('/');
+    return value.split(/[\\/]/).filter(Boolean).join("/");
   }, []);
 
   const DAY_PREFIX_RE = /^(?:day|d)[\s_-]?(\d{1,2})/i;
@@ -64,28 +64,37 @@ export function useFolderModel({
     (folder: string, items: ProjectPhoto[]) => {
       const isSelected = (dayContainers || []).includes(folder);
 
-      const hasDayAssigned = items.some(p => p.day !== null);
-      const detectedDnn = items.some(p => {
-        const parts = (p.filePath || p.originalName || '').split('/');
+      const hasDayAssigned = items.some((p) => p.day !== null);
+      const detectedDnn = items.some((p) => {
+        const parts = (p.filePath || p.originalName || "").split("/");
         return parts.length > 1 && /^D\d{1,2}/i.test(parts[1]);
       });
       const isDayName = days.some(
-        ([day]) => (dayLabels[day] || `Day ${String(day).padStart(2, '0')}`) === folder,
+        ([day]) =>
+          (dayLabels[day] || `Day ${String(day).padStart(2, "0")}`) === folder
       );
-      const isDaysContainer = folder === projectSettings?.folderStructure?.daysFolder;
-      const hasDayPrefix = DAY_PREFIX_RE.test(folder) || folder.toLowerCase().startsWith('day');
+      const isDaysContainer =
+        folder === projectSettings?.folderStructure?.daysFolder;
+      const hasDayPrefix =
+        DAY_PREFIX_RE.test(folder) || folder.toLowerCase().startsWith("day");
 
       const isDayLike =
-        hasDayAssigned || detectedDnn || isDayName || isDaysContainer || hasDayPrefix;
+        hasDayAssigned ||
+        detectedDnn ||
+        isDayName ||
+        isDaysContainer ||
+        hasDayPrefix;
 
       let dayNumber: number | null = null;
       if (hasDayAssigned) {
         const dayCounts: Record<number, number> = {};
-        items.forEach(p => {
+        items.forEach((p) => {
           if (p.day != null) dayCounts[p.day] = (dayCounts[p.day] || 0) + 1;
         });
         if (Object.keys(dayCounts).length) {
-          dayNumber = Number(Object.entries(dayCounts).sort((a, b) => b[1] - a[1])[0][0]);
+          dayNumber = Number(
+            Object.entries(dayCounts).sort((a, b) => b[1] - a[1])[0][0]
+          );
         }
       }
 
@@ -101,12 +110,12 @@ export function useFolderModel({
 
       const displayName =
         dayNumber != null
-          ? dayLabels[dayNumber] || `Day ${String(dayNumber).padStart(2, '0')}`
+          ? dayLabels[dayNumber] || `Day ${String(dayNumber).padStart(2, "0")}`
           : folder;
 
       return { isSelected, isDayLike, dayNumber, displayName };
     },
-    [dayContainers, dayLabels, days, projectSettings],
+    [dayContainers, dayLabels, days, projectSettings]
   );
 
   const sortFolders = useCallback(
@@ -116,9 +125,9 @@ export function useFolderModel({
         return { folder, items, ...category };
       });
 
-      const selected = categorized.filter(f => f.isSelected);
-      const nonDay = categorized.filter(f => !f.isSelected && !f.isDayLike);
-      const dayLike = categorized.filter(f => !f.isSelected && f.isDayLike);
+      const selected = categorized.filter((f) => f.isSelected);
+      const nonDay = categorized.filter((f) => !f.isSelected && !f.isDayLike);
+      const dayLike = categorized.filter((f) => !f.isSelected && f.isDayLike);
 
       selected.sort((a, b) => (a.dayNumber ?? 999) - (b.dayNumber ?? 999));
       nonDay.sort((a, b) => a.folder.localeCompare(b.folder));
@@ -126,22 +135,25 @@ export function useFolderModel({
 
       return { selected, nonDay, dayLike };
     },
-    [categorizeFolder],
+    [categorizeFolder]
   );
 
   const getDerivedSubfolderGroup = useCallback(
     (photo: ProjectPhoto, dayNumber: number | null) => {
-      if (dayNumber == null) return 'Day Root';
+      if (dayNumber == null) return "Day Root";
 
-      const filePath = normalizePath(photo.filePath || photo.originalName || '');
-      const folderSegments = filePath.split('/').slice(0, -1);
+      const filePath = normalizePath(
+        photo.filePath || photo.originalName || ""
+      );
+      const folderSegments = filePath.split("/").slice(0, -1);
       const daysFolder = projectSettings?.folderStructure?.daysFolder;
       let dayIndex = -1;
 
       if (daysFolder) {
         const normalizedDaysFolder = normalizePath(daysFolder);
         const daysIndex = folderSegments.findIndex(
-          segment => segment.toLowerCase() === normalizedDaysFolder.toLowerCase(),
+          (segment) =>
+            segment.toLowerCase() === normalizedDaysFolder.toLowerCase()
         );
         if (daysIndex !== -1 && daysIndex + 1 < folderSegments.length) {
           const dayFolder = folderSegments[daysIndex + 1];
@@ -152,8 +164,9 @@ export function useFolderModel({
       }
 
       if (dayIndex === -1) {
-        dayIndex = folderSegments.findIndex(segment => {
-          if (daysFolder && segment.toLowerCase() === daysFolder.toLowerCase()) return false;
+        dayIndex = folderSegments.findIndex((segment) => {
+          if (daysFolder && segment.toLowerCase() === daysFolder.toLowerCase())
+            return false;
           return detectDayNumberFromFolderName(segment) === dayNumber;
         });
       }
@@ -162,27 +175,27 @@ export function useFolderModel({
         return folderSegments[dayIndex + 1];
       }
 
-      return 'Day Root';
+      return "Day Root";
     },
-    [normalizePath, projectSettings],
+    [normalizePath, projectSettings]
   );
 
   const getSubfolderGroup = useCallback(
     (photo: ProjectPhoto, dayNumber: number | null) => {
       if (photo.subfolderOverride !== undefined) {
-        return photo.subfolderOverride ?? 'Day Root';
+        return photo.subfolderOverride ?? "Day Root";
       }
       return getDerivedSubfolderGroup(photo, dayNumber);
     },
-    [getDerivedSubfolderGroup],
+    [getDerivedSubfolderGroup]
   );
 
   const rootGroups = useMemo(() => {
     const map = new Map<string, ProjectPhoto[]>();
     for (const photo of photos) {
       if (photo.archived) continue;
-      const parts = (photo.filePath || photo.originalName || '').split(/[\\/]/);
-      const folder = parts.length > 1 ? parts[0] : '(root)';
+      const parts = (photo.filePath || photo.originalName || "").split(/[\\/]/);
+      const folder = parts.length > 1 ? parts[0] : "(root)";
       if (!map.has(folder)) map.set(folder, []);
       map.get(folder)!.push(photo);
     }
@@ -191,8 +204,8 @@ export function useFolderModel({
 
   const displayRootGroups = useMemo(() => {
     const combined = new Map(rootGroups);
-    (dayContainers || []).forEach(container => {
-      const top = normalizePath(container).split('/')[0];
+    (dayContainers || []).forEach((container) => {
+      const top = normalizePath(container).split("/")[0];
       if (!combined.has(top)) combined.set(top, []);
     });
     return Array.from(combined.entries());
@@ -201,63 +214,76 @@ export function useFolderModel({
   useEffect(() => {
     if (!debugEnabled) return;
     try {
-      console.group('[PhotoOrganizer] Folder & Day Diagnostics');
+      console.group("[PhotoOrganizer] Folder & Day Diagnostics");
       console.debug(
-        '[PhotoOrganizer] Days:',
+        "[PhotoOrganizer] Days:",
         days.map(([day]) => ({
           day,
-          label: dayLabels[day] || `Day ${String(day).padStart(2, '0')}`,
-        })),
+          label: dayLabels[day] || `Day ${String(day).padStart(2, "0")}`,
+        }))
       );
 
-      const daySources: Record<number, { count: number; sources: Set<string> }> = {};
-      photos.forEach(photo => {
+      const daySources: Record<
+        number,
+        { count: number; sources: Set<string> }
+      > = {};
+      photos.forEach((photo) => {
         if (photo.day == null) return;
         const day = photo.day as number;
-        if (!daySources[day]) daySources[day] = { count: 0, sources: new Set() };
+        if (!daySources[day])
+          daySources[day] = { count: 0, sources: new Set() };
         daySources[day].count += 1;
-        const parts = (photo.filePath || photo.originalName || '').split('/');
+        const parts = (photo.filePath || photo.originalName || "").split("/");
         if (parts.length > 1 && /^D\d{1,2}/i.test(parts[1])) {
-          daySources[day].sources.add('DnnSubfolder');
+          daySources[day].sources.add("DnnSubfolder");
         } else if ((dayContainers || []).includes(parts[0])) {
-          daySources[day].sources.add('SelectedContainer');
+          daySources[day].sources.add("SelectedContainer");
         } else if (parts[0] === projectSettings?.folderStructure?.daysFolder) {
-          daySources[day].sources.add('DaysFolder');
+          daySources[day].sources.add("DaysFolder");
         } else {
-          daySources[day].sources.add('Inferred');
+          daySources[day].sources.add("Inferred");
         }
       });
 
-      const configuredDays = Object.keys(dayLabels).map(key => Number(key));
+      const configuredDays = Object.keys(dayLabels).map((key) => Number(key));
       console.debug(
-        '[PhotoOrganizer] Day breakdown (count + sources):',
+        "[PhotoOrganizer] Day breakdown (count + sources):",
         Object.entries(daySources).map(([key, value]) => ({
           day: Number(key),
           count: value.count,
           sources: Array.from(value.sources),
-        })),
+        }))
       );
-      console.debug('[PhotoOrganizer] Configured day labels:', configuredDays);
+      console.debug("[PhotoOrganizer] Configured day labels:", configuredDays);
 
       const extraneous = Object.keys(daySources)
         .map(Number)
-        .filter(day => !configuredDays.includes(day));
+        .filter((day) => !configuredDays.includes(day));
       if (extraneous.length) {
-        console.debug('[PhotoOrganizer] Extraneous/unexpected day numbers:', extraneous);
+        console.debug(
+          "[PhotoOrganizer] Extraneous/unexpected day numbers:",
+          extraneous
+        );
       }
 
-      console.group('Root folders (all top-level folders)');
+      console.group("Root folders (all top-level folders)");
       rootGroups.forEach(([folder, items]) => {
         const reason = categorizeFolder(folder, items);
         console.groupCollapsed(`${folder} → ${reason.displayName}`);
-        console.table(items.map(item => ({ id: item.id, filePath: item.filePath, day: item.day })));
+        console.table(
+          items.map((item) => ({
+            id: item.id,
+            filePath: item.filePath,
+            day: item.day,
+          }))
+        );
         console.groupEnd();
       });
       console.groupEnd();
 
       console.groupEnd();
     } catch (error) {
-      console.debug('[PhotoOrganizer] debug logging failed', error);
+      console.debug("[PhotoOrganizer] debug logging failed", error);
     }
   }, [
     debugEnabled,
@@ -272,33 +298,37 @@ export function useFolderModel({
 
   const filteredPhotos = useMemo(() => {
     const isAssigned = (photo: ProjectPhoto) =>
-      Boolean(photo.bucket) || (photo.isPreOrganized && Boolean(photo.detectedBucket));
+      Boolean(photo.bucket) ||
+      (photo.isPreOrganized && Boolean(photo.detectedBucket));
     const baseFilter = (photo: ProjectPhoto) =>
       !hideAssigned || (!isAssigned(photo) && !photo.archived);
 
     let rawFiltered: ProjectPhoto[] = [];
 
     switch (currentView) {
-      case 'days':
+      case "days":
         if (selectedDay !== null) {
           rawFiltered = photos
-            .filter(photo => !photo.archived && photo.day === selectedDay)
+            .filter((photo) => !photo.archived && photo.day === selectedDay)
             .filter(baseFilter);
           break;
         }
         rawFiltered = photos
-          .filter(photo => photo.day !== null && !photo.archived)
+          .filter((photo) => photo.day !== null && !photo.archived)
           .filter(baseFilter);
         break;
-      case 'folders':
+      case "folders":
         if (selectedRootFolder !== null) {
-          rawFiltered = photos.filter(photo => {
+          rawFiltered = photos.filter((photo) => {
             if (photo.archived) return false;
-            const filePath = normalizePath(photo.filePath || photo.originalName || '');
+            const filePath = normalizePath(
+              photo.filePath || photo.originalName || ""
+            );
             const selectedPath = normalizePath(selectedRootFolder);
-            const folder = filePath.split('/')[0] || '(root)';
-            const matches = selectedPath.includes('/')
-              ? filePath === selectedPath || filePath.startsWith(`${selectedPath}/`)
+            const folder = filePath.split("/")[0] || "(root)";
+            const matches = selectedPath.includes("/")
+              ? filePath === selectedPath ||
+                filePath.startsWith(`${selectedPath}/`)
               : folder === selectedPath;
             return matches && baseFilter(photo);
           });
@@ -306,33 +336,40 @@ export function useFolderModel({
         }
         if (selectedDay !== null) {
           rawFiltered = photos
-            .filter(photo => !photo.archived && photo.day === selectedDay)
+            .filter((photo) => !photo.archived && photo.day === selectedDay)
             .filter(baseFilter);
           break;
         }
         rawFiltered = [];
         break;
-      case 'root':
+      case "root":
         if (selectedRootFolder !== null) {
           rawFiltered = photos.filter(
-            photo =>
+            (photo) =>
               !photo.archived &&
-              (normalizePath(photo.filePath || photo.originalName || '').split('/')[0] ||
-                '(root)') === normalizePath(selectedRootFolder) &&
-              baseFilter(photo),
+              (normalizePath(photo.filePath || photo.originalName || "").split(
+                "/"
+              )[0] || "(root)") === normalizePath(selectedRootFolder) &&
+              baseFilter(photo)
           );
           break;
         }
         rawFiltered = [];
         break;
-      case 'favorites':
-        rawFiltered = photos.filter(photo => photo.favorite && !photo.archived).filter(baseFilter);
+      case "favorites":
+        rawFiltered = photos
+          .filter((photo) => photo.favorite && !photo.archived)
+          .filter(baseFilter);
         break;
-      case 'archive':
-        rawFiltered = photos.filter(photo => photo.archived).filter(baseFilter);
+      case "archive":
+        rawFiltered = photos
+          .filter((photo) => photo.archived)
+          .filter(baseFilter);
         break;
-      case 'review':
-        rawFiltered = photos.filter(photo => photo.bucket && !photo.archived).filter(baseFilter);
+      case "review":
+        rawFiltered = photos
+          .filter((photo) => photo.bucket && !photo.archived)
+          .filter(baseFilter);
         break;
       default:
         rawFiltered = photos.filter(baseFilter);
@@ -341,7 +378,14 @@ export function useFolderModel({
 
     // Centralized deterministic ordering for all views.
     return sortPhotos(rawFiltered).photos;
-  }, [photos, hideAssigned, currentView, selectedDay, selectedRootFolder, normalizePath]);
+  }, [
+    photos,
+    hideAssigned,
+    currentView,
+    selectedDay,
+    selectedRootFolder,
+    normalizePath,
+  ]);
 
   return {
     days,

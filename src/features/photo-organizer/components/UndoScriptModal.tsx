@@ -1,5 +1,5 @@
-import React from 'react';
-import { X, Download, AlertTriangle } from 'lucide-react';
+import React from "react";
+import { X, Download, AlertTriangle } from "lucide-react";
 
 interface UndoScriptModalProps {
   isOpen: boolean;
@@ -22,7 +22,9 @@ export default function UndoScriptModal({
         <div className="px-5 py-4 border-b border-gray-800 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-yellow-500" />
-            <h2 className="text-lg font-semibold text-gray-100">Undo Last Export</h2>
+            <h2 className="text-lg font-semibold text-gray-100">
+              Undo Last Export
+            </h2>
           </div>
           <button
             onClick={onClose}
@@ -38,19 +40,23 @@ export default function UndoScriptModal({
             <div className="flex items-start gap-2">
               <AlertTriangle className="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" />
               <div className="text-sm text-yellow-200">
-                <p className="font-medium mb-1">Warning: This will delete exported files</p>
+                <p className="font-medium mb-1">
+                  Warning: This will delete exported files
+                </p>
                 <p className="text-yellow-300/80">
-                  This script will remove all files created by your last export. Files are validated
-                  by size before deletion for safety.
+                  This script will remove all files created by your last export.
+                  Files are validated by size before deletion for safety.
                 </p>
               </div>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">Undo Script</label>
+            <label className="block text-sm font-medium text-gray-300 mb-1.5">
+              Undo Script
+            </label>
             <p className="text-sm text-gray-400 mb-2">
-              Download and run this script to undo your last export:{' '}
+              Download and run this script to undo your last export:{" "}
               <code className="bg-gray-800 px-1.5 py-0.5 rounded text-xs">
                 bash narrative-undo-export.sh
               </code>
@@ -74,7 +80,9 @@ export default function UndoScriptModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">Script Preview</label>
+            <label className="block text-sm font-medium text-gray-300 mb-1.5">
+              Script Preview
+            </label>
             <textarea
               readOnly
               value={scriptText}

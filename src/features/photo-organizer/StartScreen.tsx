@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Plus } from 'lucide-react';
-import OnboardingModal, { OnboardingState, RecentProject } from './OnboardingModal';
-import ProjectTile from './ui/ProjectTile';
-import { versionManager } from '../../lib/versionManager';
+import React, { useState, useEffect } from "react";
+import { Plus } from "lucide-react";
+import OnboardingModal, {
+  OnboardingState,
+  RecentProject,
+} from "./OnboardingModal";
+import ProjectTile from "./ui/ProjectTile";
+import { versionManager } from "../../lib/versionManager";
 
 interface StartScreenProps {
   isOpen: boolean;
@@ -24,7 +27,9 @@ export default function StartScreen({
   errorMessage = null,
 }: StartScreenProps) {
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [currentVersion, setCurrentVersion] = useState(versionManager.getDisplayVersion());
+  const [currentVersion, setCurrentVersion] = useState(
+    versionManager.getDisplayVersion()
+  );
 
   // Fetch current version on mount for robustness
   useEffect(() => {
@@ -34,7 +39,7 @@ export default function StartScreen({
         setCurrentVersion(`v${version}`);
       } catch (error) {
         // Keep build-time version as fallback
-        console.warn('Failed to fetch runtime version:', error);
+        console.warn("Failed to fetch runtime version:", error);
       }
     };
 
@@ -43,10 +48,11 @@ export default function StartScreen({
 
   // Check if required APIs are available (skip in test environment)
   const isTest =
-    typeof globalThis !== 'undefined' &&
-    ((globalThis as any).vitest || (globalThis as any).__APP_VERSION__ === '0.0.0');
-  const hasFileSystemAPI = 'showDirectoryPicker' in window;
-  const hasIndexedDB = 'indexedDB' in window;
+    typeof globalThis !== "undefined" &&
+    ((globalThis as any).vitest ||
+      (globalThis as any).__APP_VERSION__ === "0.0.0");
+  const hasFileSystemAPI = "showDirectoryPicker" in window;
+  const hasIndexedDB = "indexedDB" in window;
 
   if (!isTest && (!hasFileSystemAPI || !hasIndexedDB)) {
     return (
@@ -55,15 +61,18 @@ export default function StartScreen({
           <div className="text-red-400 text-6xl mb-4">⚠️</div>
           <h1 className="text-2xl font-bold mb-4">Browser Not Supported</h1>
           <p className="text-gray-400 mb-4">
-            This app requires a modern browser with support for the File System Access API and
-            IndexedDB.
+            This app requires a modern browser with support for the File System
+            Access API and IndexedDB.
           </p>
           <div className="text-sm text-gray-500 space-y-1">
-            {!hasFileSystemAPI && <div>• File System Access API not available</div>}
+            {!hasFileSystemAPI && (
+              <div>• File System Access API not available</div>
+            )}
             {!hasIndexedDB && <div>• IndexedDB not available</div>}
           </div>
           <p className="text-gray-400 text-sm mt-4">
-            Please use a recent version of Chrome, Edge, or another supported browser.
+            Please use a recent version of Chrome, Edge, or another supported
+            browser.
           </p>
         </div>
       </div>
@@ -95,7 +104,9 @@ export default function StartScreen({
           {/* Title section */}
           <div className="mb-8">
             <h2 className="text-2xl font-bold mb-2">Projects</h2>
-            <p className="text-gray-400 text-sm">Create a new project or open a recent one</p>
+            <p className="text-gray-400 text-sm">
+              Create a new project or open a recent one
+            </p>
           </div>
 
           {/* Error message */}
@@ -124,21 +135,31 @@ export default function StartScreen({
               </button>
 
               <div className="p-3 space-y-1">
-                <div className="text-sm font-semibold text-gray-200">New Project</div>
-                <div className="text-xs text-gray-500">Start organizing photos</div>
+                <div className="text-sm font-semibold text-gray-200">
+                  New Project
+                </div>
+                <div className="text-xs text-gray-500">
+                  Start organizing photos
+                </div>
               </div>
             </div>
 
             {/* Recent Projects */}
-            {recentProjects.map(project => (
-              <ProjectTile key={project.projectId} project={project} onOpen={onOpenProject} />
+            {recentProjects.map((project) => (
+              <ProjectTile
+                key={project.projectId}
+                project={project}
+                onOpen={onOpenProject}
+              />
             ))}
           </div>
 
           {/* Empty state */}
           {recentProjects.length === 0 && (
             <div className="text-center py-12 text-gray-500">
-              <p className="text-sm">No recent projects. Create one to get started.</p>
+              <p className="text-sm">
+                No recent projects. Create one to get started.
+              </p>
             </div>
           )}
         </div>
@@ -147,7 +168,7 @@ export default function StartScreen({
       <OnboardingModal
         isOpen={showOnboarding}
         onClose={() => setShowOnboarding(false)}
-        onComplete={state => {
+        onComplete={(state) => {
           setShowOnboarding(false);
           onCreateComplete(state);
         }}

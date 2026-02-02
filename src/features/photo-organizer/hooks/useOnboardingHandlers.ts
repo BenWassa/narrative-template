@@ -1,11 +1,11 @@
-import { useCallback } from 'react';
+import { useCallback } from "react";
 
-import type { OnboardingState } from '../OnboardingModal';
+import type { OnboardingState } from "../OnboardingModal";
 
 interface UseOnboardingHandlersOptions {
   handleOnboardingCompleteInternal: (
     state: OnboardingState,
-    reselectionProjectId?: string | null,
+    reselectionProjectId?: string | null
   ) => Promise<boolean>;
   setHistory: (history: unknown[]) => void;
   setHistoryIndex: (index: number) => void;
@@ -26,7 +26,10 @@ export function useOnboardingHandlers({
 }: UseOnboardingHandlersOptions) {
   const handleOnboardingComplete = useCallback(
     async (state: OnboardingState, reselectionProjectId?: string | null) => {
-      const success = await handleOnboardingCompleteInternal(state, reselectionProjectId);
+      const success = await handleOnboardingCompleteInternal(
+        state,
+        reselectionProjectId
+      );
       if (!success) {
         return;
       }
@@ -36,7 +39,7 @@ export function useOnboardingHandlers({
       resetSelection();
       setSelectedDay(null);
       setSelectedRootFolder(null);
-      setCurrentView('folders');
+      setCurrentView("folders");
     },
     [
       handleOnboardingCompleteInternal,
@@ -46,7 +49,7 @@ export function useOnboardingHandlers({
       setHistoryIndex,
       setSelectedDay,
       setSelectedRootFolder,
-    ],
+    ]
   );
 
   return {

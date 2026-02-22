@@ -6,7 +6,7 @@ import { resolve } from 'path';
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf-8'));
 
 export default defineConfig({
-  base: '/Narrative/',
+  base: '/narrative-template/',
   plugins: [
     react(),
     {

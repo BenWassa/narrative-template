@@ -5,8 +5,8 @@ import { resolve } from 'path';
 
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf-8'));
 
-export default defineConfig({
-  base: '/narrative-template/',
+export default defineConfig(({ mode }) => ({
+  base: mode === 'production' ? '/narrative-template/' : '/',
   plugins: [
     react(),
     {
@@ -40,4 +40,4 @@ export default defineConfig({
       input: resolve(__dirname, 'index.html'),
     },
   },
-});
+}));

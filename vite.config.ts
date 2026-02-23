@@ -36,5 +36,8 @@ export default defineConfig({
     outDir: 'docs',
     // Preserve any existing docs content in docs/.
     emptyOutDir: false,
+    rollupOptions: {
+      input: resolve(__dirname, 'index.html'),
+    },
   },
 });

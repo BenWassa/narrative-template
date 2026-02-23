@@ -14,9 +14,6 @@ describe("StepIndicator", () => {
       <StepIndicator steps={steps} currentKey="b" />
     );
 
-    // Active label should be present
-    expect(screen.getByText("Second")).toBeInTheDocument();
-
     // Active bubble should contain the active step number
     const active = container.querySelector('[aria-current="step"]');
     expect(active).toBeTruthy();

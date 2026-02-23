@@ -211,9 +211,7 @@ export function detectDayNumberFromFolderName(
   return extractDayFromFolderName(folderName, tripStart)?.day ?? null;
 }
 
-export function detectBucketFromFolderName(
-  folderName: string
-): {
+export function detectBucketFromFolderName(folderName: string): {
   bucket: string;
   confidence: "high" | "medium" | "low";
   pattern: string;

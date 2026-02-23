@@ -595,11 +595,9 @@ test.skip("clicking Set Cover enters selection mode and clicking a photo sets co
   fireEvent.click(day01);
 
   // Mock fetch to return a blob for the thumbnail
-  const fetchMock = vi
-    .spyOn(global as any, "fetch")
-    .mockResolvedValue({
-      blob: async () => new Blob(["x"], { type: "image/jpeg" }),
-    });
+  const fetchMock = vi.spyOn(global as any, "fetch").mockResolvedValue({
+    blob: async () => new Blob(["x"], { type: "image/jpeg" }),
+  });
 
   const setCoverBtn = await screen.findByRole("button", { name: /Set Cover/i });
   fireEvent.click(setCoverBtn);

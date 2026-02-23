@@ -90,12 +90,12 @@ export default function PhotoGrid({
       : selectedDay === 2
       ? {
           title: "Day 2: Already organized",
-          body: "This day is fully assigned so you can see the end state. Use \"Hide Assigned\" to compare, or open a photo to browse buckets in the viewer.",
+          body: 'This day is fully assigned so you can see the end state. Use "Hide Assigned" to compare, or open a photo to browse buckets in the viewer.',
         }
       : selectedDay === 3
       ? {
           title: "Day 3: In progress",
-          body: "This day is partially assigned. Use \"Hide Assigned\" to focus on the remaining photos, then bucket the rest to finish the day.",
+          body: 'This day is partially assigned. Use "Hide Assigned" to focus on the remaining photos, then bucket the rest to finish the day.',
         }
       : null;
 

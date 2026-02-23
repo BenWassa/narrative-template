@@ -474,12 +474,12 @@ export default function PhotoOrganizer() {
 
         <main className="flex-1 overflow-y-auto">
           <div className="p-6">
-        <PhotoGrid
-          loadingProject={loadingProject}
-          currentView={currentView}
-          selectedDay={selectedDay}
-          selectedRootFolder={selectedRootFolder}
-          photos={photos}
+            <PhotoGrid
+              loadingProject={loadingProject}
+              currentView={currentView}
+              selectedDay={selectedDay}
+              selectedRootFolder={selectedRootFolder}
+              photos={photos}
               rootGroups={rootGroups}
               filteredPhotos={filteredPhotos}
               selectedPhotos={selectedPhotos}

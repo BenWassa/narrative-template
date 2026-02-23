@@ -98,7 +98,6 @@ export function useCoverPhoto({
         );
         setRecentProjects(updated.slice(0, 20));
 
-        console.log(`Cover saved to IndexedDB (${usedSize}):`, projectRootPath);
         showToast("Cover photo updated.");
       } catch (error) {
         console.error("Failed to set cover photo:", error);

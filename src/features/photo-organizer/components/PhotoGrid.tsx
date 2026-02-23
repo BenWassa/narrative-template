@@ -1,5 +1,5 @@
 import { Calendar, FolderOpen, Heart, Loader } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { PhotoViewer } from "../ui/PhotoViewer";
 import type { ProjectPhoto } from "../services/projectService";
 import { navigatePhotos, sortPhotos } from "../utils/photoOrdering";
@@ -98,15 +98,6 @@ export default function PhotoGrid({
           body: 'This day is partially assigned. Use "Hide Assigned" to focus on the remaining photos, then bucket the rest to finish the day.',
         }
       : null;
-
-  useEffect(() => {
-    console.log("[PhotoGrid] Day callout state", {
-      currentView,
-      selectedDay,
-      showDemoCallout,
-      dayCalloutTitle: dayCallout?.title ?? null,
-    });
-  }, [currentView, selectedDay, showDemoCallout, dayCallout?.title]);
 
   const dayCalloutPanel = dayCallout ? (
     <div className="rounded-lg border border-blue-500/40 bg-blue-500/10 px-4 py-3 text-sm text-blue-100">

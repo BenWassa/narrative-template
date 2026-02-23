@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect, useMemo } from "react";
 
 import type {
   ProjectPhoto,
@@ -19,6 +19,7 @@ import {
   loadExportManifest,
   clearExportManifest,
 } from "../utils/exportManifest";
+import { DEMO_PROJECT_ID } from "../demo/demoProjectState";
 
 export type ExportCopyStatus = "idle" | "copied" | "failed";
 
@@ -50,16 +51,37 @@ export function useExportScript(
   const [showUndoScript, setShowUndoScript] = useState(false);
   const [undoScriptText, setUndoScriptText] = useState("");
 
+  const isDemo = useMemo(
+    () => projectRootPath === DEMO_PROJECT_ID,
+    [projectRootPath]
+  );
+
   // Initialize manifest from localStorage on mount
   useEffect(() => {
-    if (projectRootPath) {
+    if (projectRootPath && !isDemo) {
       const manifest = loadExportManifest(projectRootPath);
       setLastExportManifest(manifest);
     }
-  }, [projectRootPath]);
+  }, [projectRootPath, isDemo]);
 
   const buildExportScript = useCallback(
     (overrideProjectPath?: string) => {
+      if (isDemo) {
+        setExportScriptText(
+          `#!/bin/bash
+
+# NOTE: This is a demo project.
+# In a real project, this script would contain commands to:
+# 1. Create your folder structure
+# 2. Move and rename your photos based on your organization
+# 3. Provide a dry-run preview and safety checks
+
+echo "This is a mock export script for the Narrative Demo."
+echo "Try it with your own photos to see a real bash script!"
+`
+        );
+        return;
+      }
       const lines: string[] = [];
 
       const daysFolder = projectSettings.folderStructure.daysFolder;

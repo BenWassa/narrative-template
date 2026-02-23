@@ -1,13 +1,13 @@
 {
   "name": "Narrative",
   "short_name": "Narrative",
-  "start_url": "/narrative-template/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#0f172a",
   "icons": [
     {
-      "src": "/narrative-template/assets/Narrative_icon.png",
+      "src": "./assets/Narrative_icon.png",
       "sizes": "1024x1024",
       "type": "image/png"
     }

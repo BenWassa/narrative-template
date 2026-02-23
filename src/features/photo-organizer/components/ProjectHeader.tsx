@@ -86,7 +86,7 @@ export default function ProjectHeader({
       <div className="flex items-center justify-between px-6 py-3">
         <div className="flex items-center gap-4">
           <img
-            src="/Narrative/assets/Narrative_icon.png"
+            src={`${import.meta.env.BASE_URL}assets/Narrative_icon.png`}
             alt="Narrative"
             className="w-8 h-8 rounded"
           />

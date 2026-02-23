@@ -86,7 +86,7 @@ export default function StartScreen({
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img
-              src="/Narrative/assets/Narrative_icon.png"
+              src={`${import.meta.env.BASE_URL}assets/Narrative_icon.png`}
               alt="Narrative"
               className="w-8 h-8 rounded"
             />

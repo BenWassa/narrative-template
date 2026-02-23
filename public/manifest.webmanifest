@@ -1,15 +1,21 @@
 {
   "name": "Narrative",
   "short_name": "Narrative",
-  "start_url": "./",
+  "description": "A photo organisation tool for travel photographers.",
+  "start_url": ".",
+  "scope": ".",
   "display": "standalone",
+  "orientation": "landscape",
   "background_color": "#0f172a",
   "theme_color": "#0f172a",
+  "lang": "en",
   "icons": [
     {
       "src": "./assets/Narrative_icon.png",
       "sizes": "1024x1024",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
+
